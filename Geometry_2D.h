@@ -1,5 +1,5 @@
 //====================================================================================
-//SOFTWARE:	Non-local Elasto-plastic Continuum Analysis (NECA)
+//SOFTWARE:	Network of Eelectrically Conductive Nanocomposites (NECN)
 //CODE FILE:	Geometry_2D.h
 //OBJECTIVE:	The definitions of point, line and shape in 2D
 //AUTHOR:		Fei Han
@@ -18,20 +18,20 @@ using namespace hns;
 #include "MathMatrix.h"
 
 //---------------------------------------------------------------------------
-//定义二维空间点类
+//The definition for points in 2D
 class Point_2D
 {
 	public:
 
-		//数据成员
+		//Data Member
 		double x, y;
 		int flag;
 
-		//构造函数
+		//Constructor
 		Point_2D(){};
 		Point_2D( double px, double py );
 
-		//成员函数
+		//Member Functions
         Point_2D operator+( Point_2D &pt );
         Point_2D operator+( const Point_2D &pt );
         Point_2D operator+( double d );
@@ -47,74 +47,69 @@ class Point_2D
 };
 
 //---------------------------------------------------------------------------
-//定义二维线(段)类
+//The definition for lines (segements) in 2D
 class Line_2D
 {
 	public:
 
-		//数据成员
-		 Point_2D point[2];	//表示线段的两个端点坐标
-		 double len;					//表示线段的长度
-		 bool virtual_line;			//表示线段是否被认定为虚线段(fase:虚线段（收缩为一点）; true:非虚线段)
+		//Data Member
+		 Point_2D point[2];		//the coordinates of two endpoints of a segment
+		 double len;					//the length of a segment
+		 bool virtual_line;			//to mark if it is a virtual(false) segment (false: reduced to a point; true: a real segment)
 
 
-		//构造函数
+		//Constructor
 		Line_2D(){};
 		Line_2D(Point_2D p0, Point_2D p1);
 		
-		//成员函数
-		double length();	//线段的长度
-        double distance_point_to_line(const Point_2D *point_temp)const;    //点到直线的距离
-        double distance_point_to_line(const Point_2D &point_temp)const;    //点到直线的距离
-        double distance_point_to_line(double dx, double dy)const;    //点到直线的距离
-        double path_point_to_line(const Point_2D &point_temp)const;    //点到直线的路径，判断点是在直线的一侧还是另一侧
-		int contain(const Point_2D &point_temp)const;    //判断线段包含一个点
-		int contain(const double &px, const double &py)const;    //判断线段包含一个点
+		//Member Functions
+		double length();																						//the length of a segment
+        double distance_point_to_line(const Point_2D *point_temp)const;			//the distance from a point to a line
+        double distance_point_to_line(const Point_2D &point_temp)const;		//the distance from a point to a line
+        double distance_point_to_line(double dx, double dy)const;					//the distance from a point to a line
+        double path_point_to_line(const Point_2D &point_temp)const;				//the path from a point to a line, that is, a point is at the side of the line or another side
+		int contain(const Point_2D &point_temp)const;										//to judge if a point is in a segment
+		int contain(const double &px, const double &py)const;							//to judge if a point is in a segment
 
 	private:
 				
-		//数据成员
-        double A, B, D ;       //直线方程的系数 Ax+By+D=0
+		//Data Member
+        double A, B, D ;       //the coeffecients of a line equation: Ax+By+D=0
 };
 
 //---------------------------------------------------------------------------
-//定义矩形类
+//The definition for a rectangle class in 2D
 class Rectangle
 {
 	public:
 
-		//数据成员
-		Point_2D point[4];	//定义矩阵的四个角点，从左下角开始顺时针转
-		double length;			//定义矩阵的长
-		double width;				//定义矩阵的宽
-		double area;				//表示矩形的面积
-		int virtual_rect;			//表示矩形是否被认定为虚矩形(0:虚矩形; 1:非虚矩形)
+		//Data Member
+		Point_2D point[4];		//the four vertex of the rectangle, account from left bottom in a clockwise direction
+		double length;				//the length of the rectangle
+		double width;				//the width of the rectangle
+		double area;					//the area of the rectangle
+		int virtual_rect;				//to mark if it is a virtual(false) rectangle (false: not a rectangle; true: a real rectangle)
 
-		//构造函数
+		//Constructor
 		Rectangle(){};
 		Rectangle (Point_2D p0, Point_2D p1, Point_2D p2, Point_2D p3);
 		Rectangle (Point_2D p0, double len, double wid);
 		Rectangle (Point_2D p0, Point_2D p2);
 
-		//成员函数
-		double calculate_area();			//计算矩形的面积
-		int contain(const Point_2D &poi)const;		//判断矩形区域是否包含了一个点（返回值：0没包含，1包含）
-		int contain_in(const Point_2D &poi)const;//判断一个点是否被包含在矩形区域内部(边界除外)（返回值：0没包含，1包含）
-		int contain(const Line_2D &line)const;			//判断矩形区域是否包含了一段线段（返回值：0没包含，1包含）
-		int contain(const Rectangle &rect)const;		//判断矩形区域是否包含了另一矩形（返回值：0没包含，1包含）
-		int contain_in(const Line_2D &line)const;	//判断一段线段是否被包含在矩形内部，在举行边界上不算（返回值：0没包含，1包含） 
-		int overlap(const Line_2D &line)const;			//判断线段是否和矩形相交，相交包括线段的两个端点都在矩形的边界上，或至少一个端点在矩形内
-																					//但如果仅有一个端点在矩形边界上，另一端点在矩形外部则不算相交)(返回值：0不相交，1相交)
-		void output_parameters();		//输出矩形的全部信息（包括四个顶点坐标，长，宽，面积，虚矩形标记）
-		int rectangles_overlapping(const Rectangle &Rect1, const Rectangle &Rect2);	 //计算矩形Rect1和Rect2的重叠矩形区
-		int make_nine_grids_by(const Rectangle rect, vector<Rectangle> &grids);	//将矩形以内部小矩形为中心做九宫格分割
+		//Member Functions
+		double calculate_area();									//to calculate the area of the rectangle
+		int contain(const Point_2D &poi)const;			//to judge if a point is in the rectangle (0: no, 1: yes)
+		int contain_in(const Point_2D &poi)const;		//to judge if a point is inside the rectanagle but isn't on the boundaries of the rectangle (0: no, 1: yes)
+		int contain(const Line_2D &line)const;			//to judge if a segment is in the rectangle (0: no, 1: yes)
+		int contain(const Rectangle &rect)const;		//to judge if a rectangle is in this rectangle (0: no, 1: yes)
+		int contain_in(const Line_2D &line)const;		//to judge if a segment is inside the rectangle, but doesn't intersect with the boundaries of the rectangle (0: no, 1: yes)
+		int overlap(const Line_2D &line)const;			//to judge if a segment is intersect with the rectangle, including both endpoints of the segments on the boundaries of the rectangle 
+																			//or at least one endpoint inside the rectangle.
+																			//If only one endpoint at the boundaries of the rectangle but another endpoint is outside of the rectangle, it isn't considered as intersection) (0: no, 1: yes)
+		void output_parameters();								//Output all information of a rectangle, including four vertex, length, width, area and virtual_rect
+		int rectangles_overlapping(const Rectangle &Rect1, const Rectangle &Rect2);			//Calculate the overlapping rectangle between Rect1 and Rect2
+		int make_nine_grids_by(const Rectangle rect, vector<Rectangle> &grids);					//Divide the rectangle into a Sudoku where the inner rectangle becomes the center element of the Sudoku (将矩形以内部小矩形为中心做九宫格分割)
 };
 //---------------------------------------------------------------------------
-//记录耦合区单元与区域1或2网格的相交单元和相交小矩形
-struct Relative_Ele_Rect
-{	
-	vector<int> relative_ele_num[2];
-	vector<Rectangle> relative_rect[2];
-};
 #endif
 //===========================================================================

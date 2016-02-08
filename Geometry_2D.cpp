@@ -1,5 +1,5 @@
 //====================================================================================
-//SOFTWARE:	Non-local Elasto-plastic Continuum Analysis (NECA)
+//SOFTWARE:	Network of Eelectrically Conductive Nanocomposites (NECN)
 //CODE FILE:	Geometry_2D.cpp
 //OBJECTIVE:	The definitions of point, line and shape in 2D
 //AUTHOR:		Fei Han
@@ -9,7 +9,7 @@
 #include "Geometry_2D.h"
 
 //---------------------------------------------------------------------------
-//二维点类
+//The member function for the 2D point class
 Point_2D::Point_2D( double px, double py )
 {
 	x = px;
@@ -87,9 +87,9 @@ double Point_2D::distance_to(const double &px, const double &py)const
 }
 //===========================================================================
 
-//二维线类
+//The member function for the 3D line class
 //---------------------------------------------------------------------------
-//构造函数
+//Constructor
 Line_2D::Line_2D(Point_2D p0, Point_2D p1)
 {
 	point[0] = p0;
@@ -102,7 +102,7 @@ Line_2D::Line_2D(Point_2D p0, Point_2D p1)
 	else virtual_line = true;
 }
 //---------------------------------------------------------------------------   
-//线段的长度
+//The length of segment
 double Line_2D::length() 
 {
 	double dx = point[1].x-point[0].x;
@@ -110,49 +110,49 @@ double Line_2D::length()
 	return sqrt(dx*dx+dy*dy);
 }
 //---------------------------------------------------------------------------
-//点到直线的距离
+//The distance from a point to a line
 double Line_2D::distance_point_to_line(const Point_2D *point_temp)const
 {
-	if(A==0&&B==0) hout << "注意！该线段退化成一个点！求点到直线的距离时，分母为零！" <<endl;
+	if(A==0&&B==0) hout << "Attention: this segment is reduced to a point!" <<endl;
 	return fabs(A*point_temp->x+B*point_temp->y+D)/sqrt(A*A+B*B);
 }
 double Line_2D::distance_point_to_line(const Point_2D &point_temp)const
 {
-	if(A==0&&B==0) hout << "注意！该线段退化成一个点！求点到直线的距离时，分母为零！" <<endl;
+	if(A==0&&B==0) hout << "Attention: this segment is reduced to a point!" <<endl;
 	return fabs(A*point_temp.x+B*point_temp.y+D)/sqrt(A*A+B*B);
 }
 double Line_2D::distance_point_to_line(double dx, double dy)const
 {
-	if(A==0&&B==0) hout << "注意！该线段退化成一个点！求点到直线的距离时，分母为零！" <<endl;
+	if(A==0&&B==0) hout << "Attention: this segment is reduced to a point!" <<endl;
 	return fabs(A*dx+B*dy+D)/sqrt(A*A+B*B);
 }
 //---------------------------------------------------------------------------
-//点到直线的路径，判断点是在直线的一侧还是另一侧
+//The path from a point to a line, that is, a point is at the side of the line or another side
 double Line_2D::path_point_to_line(const Point_2D &point_temp)const
 {
-	if(A==0&&B==0) hout << "注意！该线段退化成一个点！求点到直线的距离时，分母为零！" <<endl;
+	if(A==0&&B==0) hout << "Attention: this segment is reduced to a point!" <<endl;
 	return A*point_temp.x+B*point_temp.y+D;
 }
 //---------------------------------------------------------------------------
-//判断线段包含一个点
+//To judge if a point is in a segment
 int Line_2D::contain(const Point_2D &point_temp)const
 {
-	//点到线段两个端点的距离大于两个端点之间的距离
+	//to judge if the distance from a point to two endpoints is larger than the distance between endpoints
 	if( fabs(point_temp.distance_to(point[0])+point_temp.distance_to(point[1])-point[0].distance_to(point[1]))>Zero ) return 0; 
 	return 1;
 }
 int Line_2D::contain(const double &px, const double &py)const
 {
 	Point_2D point_temp(px, py);
-	//点到线段两个端点的距离大于两个端点之间的距离
+	//to judge if the distance from a point to two endpoints is larger than the distance between endpoints
 	if( fabs(point_temp.distance_to(point[0])+point_temp.distance_to(point[1])-point[0].distance_to(point[1]))>Zero ) return 0; 
 	return 1;
 }
 //===========================================================================
 
-//矩形类
+//The definition for a rectangle class in 2D
 //---------------------------------------------------------------------------
-//构造函数
+//Constructor
 Rectangle::Rectangle(Point_2D p0, Point_2D p1, Point_2D p2, Point_2D p3)
 {
 	point[0] = p0;
@@ -192,13 +192,13 @@ Rectangle::Rectangle(Point_2D p0, Point_2D p2)
 	else virtual_rect = 0;
 }
 //---------------------------------------------------------------------------
-//计算矩形的面积
+//To calculate the area of the rectangle
 double Rectangle::calculate_area()
 {
 	return length*width;
 }
 //---------------------------------------------------------------------------
-//判断矩形区域是否包含了一个点（返回值：0没包含，1包含）
+//To judge if a point is in the rectangle (0: no, 1: yes)
 int Rectangle::contain(const Point_2D &poi)const
 {
 	if(  poi.x>=point[0].x && poi.x<=point[2].x &&
@@ -206,7 +206,7 @@ int Rectangle::contain(const Point_2D &poi)const
 	else return 0;
 }
 //---------------------------------------------------------------------------
-//判断一个点是否被包含在矩形区域内部(边界除外)（返回值：0没包含，1包含）
+//To judge if a point is inside the rectanagle but isn't on the boundaries of the rectangle (0: no, 1: yes)
 int Rectangle::contain_in(const Point_2D &poi)const
 {
 	if(  poi.x>point[0].x && poi.x<point[2].x &&
@@ -214,7 +214,7 @@ int Rectangle::contain_in(const Point_2D &poi)const
 	else return 0;
 }
 //---------------------------------------------------------------------------
-//判断矩形区域是否包含了一段线段（返回值：0没包含，1包含）
+//To judge if a segment is in the rectangle (0: no, 1: yes)
 int Rectangle::contain(const Line_2D &line)const
 {
 	for(int i=0; i<2; i++)
@@ -222,7 +222,7 @@ int Rectangle::contain(const Line_2D &line)const
 	return 1;
 }
 //---------------------------------------------------------------------------
-//判断矩形区域是否包含了另一矩形（返回值：0没包含，1包含）
+//To judge if a rectangle is in this rectangle (0: no, 1: yes)
 int Rectangle::contain(const Rectangle &rect)const
 {
 	for(int i=0; i<4; i++)
@@ -230,7 +230,7 @@ int Rectangle::contain(const Rectangle &rect)const
 	return 1;
 }
 //---------------------------------------------------------------------------
-//判断一段线段是否被包含在矩形内部，在矩形边界上不算（返回值：0没包含，1包含） 
+//To judge if a segment is inside the rectangle, but doesn't intersect with the boundaries of the rectangle (0: no, 1: yes)
 int Rectangle::contain_in(const Line_2D &line)const
 {
 	if( contain(line.point[0])==1&&contain(line.point[1])==1 ) 
@@ -242,8 +242,8 @@ int Rectangle::contain_in(const Line_2D &line)const
 	return 0;
 }
 //---------------------------------------------------------------------------
-//判断线段是否和矩形相交，相交包括线段的两个端点都在矩形的边界上，或至少一个端点在矩形内
-//但如果仅有一个端点在矩形边界上，另一端点在矩形外部则不算相交)(返回值：0不相交，1相交)
+//To judge if a segment is intersect with the rectangle, including both endpoints of the segments on the boundaries of the rectangle or at least one endpoint inside the rectangle.
+//If only one endpoint at the boundaries of the rectangle but another endpoint is outside of the rectangle, it isn't considered as intersection) (0: no, 1: yes)
 int Rectangle::overlap(const Line_2D &line)const
 {
 	if( contain(line.point[0])==1||contain(line.point[1])==1 )
@@ -263,16 +263,16 @@ int Rectangle::overlap(const Line_2D &line)const
 	return 0;
 }
 //---------------------------------------------------------------------------
-//计算矩形Rect1和Rect2的重叠矩形区
+//Calculate the overlapping rectangle between Rect1 and Rect2
 int Rectangle::rectangles_overlapping(const Rectangle &Rect1, const Rectangle &Rect2)
 {
-	//两个矩形的公共部分，即两个矩形的最低点与最高点坐标依次排序，选中间的两个值
-	//两个矩形的最低点中取坐标最大值
+	//the common part of both rectangles, that is, to sort the points positions from lower to upper, and then to choose the middle two points
+	//to choose the point with the bigger value in both lower points of two rectangles
 	if(Rect1.point[0].x<=Rect2.point[0].x)	point[0].x = Rect2.point[0].x;
 	else point[0].x = Rect1.point[0].x;
 	if(Rect1.point[0].y<=Rect2.point[0].y)	point[0].y = Rect2.point[0].y;
 	else point[0].y = Rect1.point[0].y;
-	//两个矩形的最高点中取坐标最小值
+	//to choose the point with the smaller value in both upper points of two rectangles
 	if(Rect1.point[2].x<=Rect2.point[2].x)	point[2].x = Rect1.point[2].x;
 	else point[2].x = Rect2.point[2].x;
 	if(Rect1.point[2].y<=Rect2.point[2].y)	point[2].y = Rect1.point[2].y;
@@ -286,26 +286,26 @@ int Rectangle::rectangles_overlapping(const Rectangle &Rect1, const Rectangle &R
 	width = point[2].y-point[0].y;
 	area = length*width;
 	if(length>0&&width>0) virtual_rect = 1;
-	else virtual_rect = 0;  //没有重叠矩形，或者仅仅重叠一点或一条线段
+	else virtual_rect = 0;  //Two rectangles have no overlapping, or only overlap with a vertex or a boundary
 
 	return virtual_rect;
 }
 //---------------------------------------------------------------------------
-//将矩形以内部小矩形为中心做九宫格分割
+//Divide the rectangle into a Sudoku where the inner rectangle becomes the center element of the Sudoku (将矩形以内部小矩形为中心做九宫格分割)
 int Rectangle::make_nine_grids_by(const Rectangle rect, vector<Rectangle> &grids)
 {
-	if( contain(rect)==0 ) 
+	if(contain(rect)==0) 
 	{
-		hout << "该矩形不在将要被分割的大矩形区域内！ 请检查！" << endl;
+		hout << "This rectangle is not inside the rectangle which will be divided, please check it!" << endl;
 		return 0;
 	}	
-	//记录基本的分割点
+	//to record the basic points for division
 	Point_2D point_base[4];
 	point_base[0] = point[0];
 	point_base[1] = rect.point[0];
 	point_base[2] = rect.point[2];
 	point_base[3] = point[2];
-	//计算九宫格上所有的节点（从左向右，从下向上）
+	//to calculate all points on the Sudoku (from left to right, from lower to upper)
 	Point_2D point_ex[16];
 	for(int i=0; i<4; i++)
 		for(int j=0; j<4; j++)
@@ -313,8 +313,8 @@ int Rectangle::make_nine_grids_by(const Rectangle rect, vector<Rectangle> &grids
 			point_ex[i*4+j].x = point_base[j].x;
 			point_ex[i*4+j].y = point_base[i].y;
 		}
-	//记录区域的各个子矩形
-	grids.clear();  //情况向量
+	//to record every sub-rectangle in the Sudoku
+	grids.clear();
 	for(int i=0; i<3; i++)
 		for(int j=0; j<3; j++)
 		{
@@ -326,7 +326,7 @@ int Rectangle::make_nine_grids_by(const Rectangle rect, vector<Rectangle> &grids
 }
 
 //---------------------------------------------------------------------------
-//输出矩形的全部信息（包括四个顶点坐标，长，宽，面积，虚矩形标记）
+//Output all information of a rectangle, including four vertex, length, width, area and virtual_rect
 void Rectangle::output_parameters()
 {
 	hout << "The coordinates of four corner points (starting from lower-left corner point in clockwise direction):" << endl;
