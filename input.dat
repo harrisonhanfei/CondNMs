@@ -1,0 +1,130 @@
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Please input the name of application case
+Application_Name
+App_Electrical_Network_3D
+%
+%
+%
+%========================================================================================================
+%Please input the paramters of simulation
+Simulation_Parameters
+%--------------------------------To start
+%Please input the name of simulation
+Test
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Please input the number of samples
+1
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%This is a switch that defines if the structure of the CNTs is created or read from a file. There are two possible options: 'Create_Network' and 'Read_Network'
+%Create_Network:	to create a new structure
+%Read_Network:	to read the data of network from a file
+Create_Network
+%Read_Network
+%--------------------------------To end
+%
+%
+%
+%========================================================================================================
+%-------------------------------- AMC
+%Define the geometric and related parameters of RVE
+RVE_Geometry
+%--------------------------------To start
+%Define the domain of RVE: the lower-left corner point of RVE and the length, width and height of RVE
+0 0 0 1.000000 1.000000 1.000000
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define the size range of the observation window and descrement by every step in x, y and z directions: 
+%Max_length, Max_width, Max_height (this value could be less than the size of RVE)
+%delta_length, delta_width, delta_height
+%Min_length, Min_width, Min_height
+%The cutoff widows have the same centers of RVE
+1.000000 1.000000 1.000000
+0.250000 0.250000 0.250000
+1.000000 1.000000 1.000000
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define minimum size for background grids (looking for contact points)
+0.250000 0.250000 0.250000
+%--------------------------------To end
+%
+%
+%
+%========================================================================================================
+%Define the geometric parameters of nanotubes
+Nanotube_Geometry
+%--------------------------------To start
+%Define the initial growth direction type (random or specific) in a RVE
+%If you input "random", that means the initial growth directions of nanotubes are random
+%If you input "specific", that means the initial growth directions of nanotubes are along a specific direction
+%and please input the direction angles (in spherical coordinates) if you input "specific" type, for example: specific 0 0
+random
+%specific 0 0
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define the normal distribution range [-omega, omega] of the growth direction
+%PI/2=1.5707963267948966; PI/4=0.7853981633974483; PI/6=0.5235987755982989; PI/12=0.2617993877991494; PI/36=0.087266462599716479; PI/60=0.05235987755982981
+%Please input the angle omega
+%0.087266462599716479
+1.5707963267948966
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define the step length (unit: micromether) of nanotube growth
+0.01
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define the distribution type (uniform or normal) of the length (unit: micromether) of nanotubes and the length range (min, max) of nanotubes in a RVE
+%If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
+uniform 1.000000 1.000000
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanotubes and the radius range (min, max) of nanotubes in a RVE
+%If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
+uniform 0.005000 0.005000
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define the volume or weight fraction of nanotubes in the RVE
+%If you input "vol", the volume fraction is the criterion and the mode of accumulation, for example: vol 0.01 0
+%or if you input "wt", the weight fraction is the criterion and the mode of accumulation and the linear density (1E-12g/'nu'm) of CNT and the density (1E-12g/'nu'm^3)of polymer are needed.
+%the mode of accumulation: 0 means every sample uses the same fraction; 1 or 2 mean every sample uses the accumulated fraction by different ways
+%nwt 0.005 0 5.8E-5 1.06
+vol 0.005000 0
+%--------------------------------To end
+%
+%
+%
+%========================================================================================================
+%Define the geometric parameters of ellipsoid cluster of CNTs
+Cluster_Geometry
+%--------------------------------To start
+%Please input the volume fraction of ellipsoid, the length of axes of ellipsoids and the growth probability of a cnt in the cluster, and the volume fraction of cnt in the cluster and the print key: 
+% v amin amax bmin cmin p vc key, such as 0.05 0.1 0.1 0 0 1 0.4774648 2
+%where the long axis a of ellipsoid obays the uniform distribution among (amin, amax), the middle axis b obays the uniform distribution among (bmin, a),
+%and the short axis c obays the uniform distribution among (cmin, b);
+%if bmin=cmin=0, then the spheres will be produced with radii among (amin, amax)
+%the growth probability p of a cnt in a cluster: 0 <= p <= 1
+%the volume fraction of cnt in the cluster, it usually bigger than the volume fraction in the RVE
+%the print key: 0 denotes "no print"; 1 denotes "only print the nanotubes in the ellipsoids"; 2 denotes "print the nanotubes in the ellipsolds and the surfaces of all ellipsoids"
+%0.00418879 0.1 0.1 0 0 1 0.4774648 2
+0
+%--------------------------------To end
+%
+%
+%
+%========================================================================================================
+%-------------------------------- AMC
+%Define the cutoff distances
+Cutoff_Distances
+%--------------------------------To start
+%Define van der Waals distance
+0.000340
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Define cutoff distance for tunneling
+0.001800
+%-------------------------------- To end
+%
+%
+%
+%========================================================================================================
+%-------------------------------- AMC
+%Define the electrical parameters
+Electrical_Parameters
+%--------------------------------To start
+%Provide the magnitude of the applied voltage
+1
+%------------------------------------------------------------------------------------------------------------------------------------------------------------
+%Provide the value of resistivity of the carbon fiber
+0.001
+%-------------------------------- To end
