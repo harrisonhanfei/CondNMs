@@ -128,7 +128,7 @@ int Input::Data_Initialization()
 	electric_para.keywords = "Electrical_Parameters";
 	electric_para.mark = false;
 	electric_para.applied_voltage = 1.0;
-	electric_para.resistivity_Ag = 0.001;
+	electric_para.resistivity_NW = 0.001;
 
 	cout << "^_^ Data initialization achieves" <<endl<<endl;
 	hout << "^_^ Data initialization achieves" <<endl<<endl;
@@ -381,7 +381,7 @@ int Input::Read_electrical_paramters(struct Electric_para &electric_para, ifstre
 	istr0 >> electric_para.applied_voltage;		
 
 	istringstream istr1(Get_Line(infile));
-	istr1 >> electric_para.resistivity_Ag;
+	istr1 >> electric_para.resistivity_NW;
 
 	return 1;
 }

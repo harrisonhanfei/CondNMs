@@ -44,26 +44,26 @@ int main(int argc, char** argv)
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//Identification Tag
 	cout<<endl;
-	cout<<"*************************************************"<<endl;
-	cout<<"*                  NwNw_2D   v0.1                  *"<<endl;
-	cout<<"*                                               *"<<endl;
+	cout<<"********************************************************"<<endl;
+	cout<<"*                  NwNw_2D   v0.1                      *"<<endl;
+	cout<<"*                                                      *"<<endl;
 	cout<<"*          Fei Han            Thirupathi Maloth        *"<<endl;
-	cout<<"*                                               *"<<endl;
-	cout<<"*     Propriety of KAUST/COHMAS Laboratory      *"<<endl;
+	cout<<"*                                                      *"<<endl;
+	cout<<"*     Propriety of KAUST/COHMAS Laboratory             *"<<endl;
 	cout<<"* fei.han@kaust.edu.sa  thirupathi.maloth@kaust.edu.sa *"<<endl;
-	cout<<"*************************************************"<<endl;
+	cout<<"********************************************************"<<endl;
 	cout<<endl;
 	cout<<endl;
 
 	hout<<endl;
-	hout<<"******************************************"<<endl;
+	hout<<"**********************************************"<<endl;
 	hout<<"                   NwNw_2D   v0.1								"<<endl;
 	hout<<" 																			"<<endl;
 	hout<<"           Fei Han            Thirupathi Maloth				"<<endl;
 	hout<<" 																			"<<endl;
 	hout<<"      Propriety of KAUST/COHMAS Laboratory	"<<endl;
 	hout<<"  fei.han@kaust.edu.sa  thirupathi.maloth@kaust.edu.sa	"<<endl;
-	hout<<"******************************************"<<endl;
+	hout<<"**********************************************"<<endl;
 	hout<<endl;
 	hout<<endl;
 
@@ -130,27 +130,27 @@ int main(int argc, char** argv)
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//End comments
 	cout<< endl;
-	cout<<"*************************************************"<<endl;
-	cout<<"*             Hope it helped ;)                 *"<<endl;
-	cout<<"*                                               *"<<endl;
+	cout<<"********************************************************"<<endl;
+	cout<<"*             Hope it helped ;)                        *"<<endl;
+	cout<<"*                                                      *"<<endl;
 	cout<<"*          Fei Han            Thirupathi Maloth        *"<<endl;
-	cout<<"*                                               *"<<endl;
-	cout<<"*     Propriety of KAUST/COHMAS Laboratory      *"<<endl;
+	cout<<"*                                                      *"<<endl;
+	cout<<"*     Propriety of KAUST/COHMAS Laboratory             *"<<endl;
 	cout<<"* fei.han@kaust.edu.sa  thirupathi.maloth@kaust.edu.sa *"<<endl;
-	cout<<"*************************************************"<<endl;
+	cout<<"********************************************************"<<endl;
 	cout<<endl;
 	cout<<endl;
 
 	hout<<endl;
 	hout<<endl;
-	hout<<"******************************************"<<endl;
+	hout<<"**********************************************"<<endl;
 	hout<<"              Hope it helped ;)											"<<endl;
 	hout<<" 																				"<<endl;
 	hout<<"           Fei Han            Thirupathi Maloth							"<<endl;
 	hout<<" 																				"<<endl;
 	hout<<"      Propriety of KAUST/COHMAS Laboratory		"<<endl;
 	hout<<"  fei.han@kaust.edu.sa  thirupathi.maloth@kaust.edu.sa		"<<endl;
-	hout<<"******************************************"<<endl;
+	hout<<"**********************************************"<<endl;
 	hout<<endl;
 	hout<<endl;
 

@@ -41,7 +41,7 @@ private:
 	//Generate a sequence of Gaussian quadrature points
 	int Generate_gauss_array(vector<double> &gauss, vector<double> &weight)const;
 
-	//读入信息一行，跳过注释行（以%开头）
+	//Read one line data, jump over the comment line (that is the line starts with '%')
 	string Get_Line(ifstream &infile)const;
 };//-----------------------------------------------------
 #endif

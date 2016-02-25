@@ -81,7 +81,7 @@ struct Electric_para{
 			string keywords;
 			bool mark;
 			double applied_voltage;			//Define the magnitude of the applied voltage
-			double resistivity_Ag;			//Define the resistivity value of the carbon fiber
+			double resistivity_NW;			//Define the resistivity value of the nanowire
 		};
 
 //---------------------------------------------------------------------------
