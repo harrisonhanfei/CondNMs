@@ -1,7 +1,7 @@
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Please input the name of application case
 Application_Name
-App_Electrical_Network_3D
+App_Electrical_Network_2D
 %
 %
 %
@@ -29,20 +29,20 @@ Create_Network
 %Define the geometric and related parameters of RVE
 RVE_Geometry
 %--------------------------------To start
-%Define the domain of RVE: the lower-left corner point of RVE and the length, width and height of RVE
-0 0 0 1.000000 1.000000 1.000000
+%Define the domain of RVE: the lower-left corner point of RVE and the length, width of RVE
+0 0 1.000000 1.000000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Define the size range of the observation window and descrement by every step in x, y and z directions: 
-%Max_length, Max_width, Max_height (this value could be less than the size of RVE)
-%delta_length, delta_width, delta_height
-%Min_length, Min_width, Min_height
+%Define the size range of the observation window and descrement by every step in x, y directions: 
+%Max_length, Max_width (this value could be less than the size of RVE)
+%delta_length, delta_width
+%Min_length, Min_width
 %The cutoff widows have the same centers of RVE
-1.000000 1.000000 1.000000
-0.250000 0.250000 0.250000
-1.000000 1.000000 1.000000
+1.000000 1.000000
+0.250000 0.250000
+1.000000 1.000000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define minimum size for background grids (looking for contact points)
-0.250000 0.250000 0.250000
+0.250000 0.250000
 %--------------------------------To end
 %
 %
@@ -76,18 +76,18 @@ uniform 1.000000 1.000000
 uniform 0.005000 0.005000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the volume or weight fraction of nanotubes in the RVE
-%If you input "vol", the volume fraction is the criterion and the mode of accumulation, for example: vol 0.01 0
+%If you input "area", the volume fraction is the criterion and the mode of accumulation, for example: vol 0.01 0
 %or if you input "wt", the weight fraction is the criterion and the mode of accumulation and the linear density (1E-12g/'nu'm) of CNT and the density (1E-12g/'nu'm^3)of polymer are needed.
 %the mode of accumulation: 0 means every sample uses the same fraction; 1 or 2 mean every sample uses the accumulated fraction by different ways
 %nwt 0.005 0 5.8E-5 1.06
-vol 0.005000 0
+area 0.005000 0
 %--------------------------------To end
 %
 %
 %
 %========================================================================================================
 %Define the geometric parameters of ellipsoid cluster of CNTs
-Cluster_Geometry
+%Cluster_Geometry
 %--------------------------------To start
 %Please input the volume fraction of ellipsoid, the length of axes of ellipsoids and the growth probability of a cnt in the cluster, and the volume fraction of cnt in the cluster and the print key: 
 % v amin amax bmin cmin p vc key, such as 0.05 0.1 0.1 0 0 1 0.4774648 2
@@ -98,7 +98,7 @@ Cluster_Geometry
 %the volume fraction of cnt in the cluster, it usually bigger than the volume fraction in the RVE
 %the print key: 0 denotes "no print"; 1 denotes "only print the nanotubes in the ellipsoids"; 2 denotes "print the nanotubes in the ellipsolds and the surfaces of all ellipsoids"
 %0.00418879 0.1 0.1 0 0 1 0.4774648 2
-0
+%0
 %--------------------------------To end
 %
 %
@@ -106,13 +106,13 @@ Cluster_Geometry
 %========================================================================================================
 %-------------------------------- AMC
 %Define the cutoff distances
-Cutoff_Distances
+%Cutoff_Distances
 %--------------------------------To start
 %Define van der Waals distance
-0.000340
+%0.000340
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define cutoff distance for tunneling
-0.001800
+%0.001800
 %-------------------------------- To end
 %
 %
@@ -125,6 +125,6 @@ Electrical_Parameters
 %Provide the magnitude of the applied voltage
 1
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Provide the value of resistivity of the carbon fiber
+%Provide the value of resistivity of the Ag Nanowire
 0.001
 %-------------------------------- To end

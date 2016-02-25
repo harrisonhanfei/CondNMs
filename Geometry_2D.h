@@ -53,7 +53,7 @@ class Line_2D
 	public:
 
 		//Data Member
-		 Point_2D point[2];		//the coordinates of two endpoints of a segment
+		 Point_2D point[2];		        //the coordinates of two endpoints of a segment
 		 double len;					//the length of a segment
 		 bool virtual_line;			//to mark if it is a virtual(false) segment (false: reduced to a point; true: a real segment)
 
