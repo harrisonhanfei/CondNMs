@@ -61,15 +61,15 @@ random
 %PI/2=1.5707963267948966; PI/4=0.7853981633974483; PI/6=0.5235987755982989; PI/12=0.2617993877991494; PI/36=0.087266462599716479; PI/60=0.05235987755982981
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the step length (unit: micromether) of nanowire growth
-0.01
+%0.0
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires and the length range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
-uniform 0.200000 0.200000
+uniform 0.0200000 0.0200000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires and the radius range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
-uniform 0.005000 0.005000
+uniform 0.0005000 0.0005000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the area or weight fraction of nanowires in the RVE
 %If you input "area", the area fraction is the criterion and the mode of accumulation, for example: area 0.01 0

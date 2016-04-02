@@ -105,7 +105,7 @@ int Input::Data_Initialization()
 	nanowire_geo.mark = false;
 	nanowire_geo.dir_distrib_type = "random";
 	nanowire_geo.angle_max = 1.5707963267948966;
-	nanowire_geo.step_length = 0.01;
+//	nanowire_geo.step_length = 0.01;
 	nanowire_geo.len_distrib_type = "uniform";
 	nanowire_geo.len_min = 1.0;
 	nanowire_geo.len_max = 1.0;
@@ -292,14 +292,6 @@ int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstr
 
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
-	//Define the step length (unit: micromether) of nanowire growth
-	istringstream istr_step_len(Get_Line(infile));
-	istr_step_len >> nanowire_geo.step_length;
-	if(nanowire_geo.step_length<=0||
-	   nanowire_geo.step_length>=0.25*geom_rve.len_x||
-	   nanowire_geo.step_length>=0.25*geom_rve.wid_y)
-	{ hout << "Error: the step length must be positive and 0.25 times lesser than the dimension of the RVE box." << endl;	return 0; }
-
 	//-----------------------------------------------------------------------------------------------------------------------------------------
     //Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires and the length range (min, max) of nanowires in a RVE
     istringstream istr_cnt_len(Get_Line(infile));
@@ -315,8 +307,8 @@ int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstr
     if(nanowire_geo.rad_distrib_type!="uniform"&&nanowire_geo.rad_distrib_type!="normal"){ hout << "Error: the distribution of the radius should be either normal or uniform." << endl;	return 0; }
     istr_cnt_rad >> nanowire_geo.rad_min >> nanowire_geo.rad_max;
     if(nanowire_geo.rad_min<0||nanowire_geo.rad_max<0||nanowire_geo.rad_max<nanowire_geo.rad_min||
-	   nanowire_geo.rad_min>3*nanowire_geo.step_length||nanowire_geo.rad_max>0.05*nanowire_geo.len_min)
-	{ hout << "Error: the radius must be non-negative, min must be smaller than max, min must be smaller than 3*step_length and max must be smaller than 0.05*len_min." << endl; return 0; }
+	   nanowire_geo.rad_max>0.05*nanowire_geo.len_min)
+	{ hout << "Error: the radius must be non-negative, min must be smaller than max and max must be smaller than 0.05*len_min." << endl; return 0; }
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//Define the area or weight fraction of nanowires in the RVE
