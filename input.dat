@@ -48,39 +48,35 @@ RVE_Geometry
 %
 %
 %========================================================================================================
-%Define the geometric parameters of nanotubes
-Nanotube_Geometry
+%Define the geometric parameters of nanowires
+Nanowire_Geometry
 %--------------------------------To start
-%Define the initial growth direction type (random or specific) in a RVE
-%If you input "random", that means the initial growth directions of nanotubes are random
-%If you input "specific", that means the initial growth directions of nanotubes are along a specific direction
-%and please input the direction angles (in spherical coordinates) if you input "specific" type, for example: specific 0 0
+%Define the orientational distribution type (random or specific) in a RVE
+%If you input "random", that means orientational distribution of nanowires is isotropic
+%If you input "specific", You can opt for anisotropic orientational distribution  theta =[-th_max th_max] 
+%th_max = 0.0 -> Fully anisotropic; th_max =PI/2 -> Fully isotropic
 random
-%specific 0 0
-%------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Define the normal distribution range [-omega, omega] of the growth direction
+%specific PI/4
+%----------------------------------------------------------------------------------------------------------------------------------------------------------
 %PI/2=1.5707963267948966; PI/4=0.7853981633974483; PI/6=0.5235987755982989; PI/12=0.2617993877991494; PI/36=0.087266462599716479; PI/60=0.05235987755982981
-%Please input the angle omega
-%0.087266462599716479
-1.5707963267948966
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Define the step length (unit: micromether) of nanotube growth
+%Define the step length (unit: micromether) of nanowire growth
 0.01
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Define the distribution type (uniform or normal) of the length (unit: micromether) of nanotubes and the length range (min, max) of nanotubes in a RVE
+%Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires and the length range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
-uniform 1.000000 1.000000
+uniform 0.200000 0.200000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanotubes and the radius range (min, max) of nanotubes in a RVE
+%Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires and the radius range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
 uniform 0.005000 0.005000
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
-%Define the volume or weight fraction of nanotubes in the RVE
-%If you input "area", the volume fraction is the criterion and the mode of accumulation, for example: vol 0.01 0
+%Define the area or weight fraction of nanowires in the RVE
+%If you input "area", the area fraction is the criterion and the mode of accumulation, for example: area 0.01 0
 %or if you input "wt", the weight fraction is the criterion and the mode of accumulation and the linear density (1E-12g/'nu'm) of CNT and the density (1E-12g/'nu'm^3)of polymer are needed.
 %the mode of accumulation: 0 means every sample uses the same fraction; 1 or 2 mean every sample uses the accumulated fraction by different ways
 %nwt 0.005 0 5.8E-5 1.06
-area 0.005000 0
+area 0.5000 0
 %--------------------------------To end
 %
 %
@@ -96,7 +92,7 @@ area 0.005000 0
 %if bmin=cmin=0, then the spheres will be produced with radii among (amin, amax)
 %the growth probability p of a cnt in a cluster: 0 <= p <= 1
 %the volume fraction of cnt in the cluster, it usually bigger than the volume fraction in the RVE
-%the print key: 0 denotes "no print"; 1 denotes "only print the nanotubes in the ellipsoids"; 2 denotes "print the nanotubes in the ellipsolds and the surfaces of all ellipsoids"
+%the print key: 0 denotes "no print"; 1 denotes "only print the nanowires in the ellipsoids"; 2 denotes "print the nanowires in the ellipsolds and the surfaces of all ellipsoids"
 %0.00418879 0.1 0.1 0 0 1 0.4774648 2
 %0
 %--------------------------------To end

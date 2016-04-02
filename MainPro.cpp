@@ -12,6 +12,7 @@
 using namespace hns;
 
 #include "Input_Reader.h"
+#include "App_Network_2D.h"
 
 int main(int argc, char** argv)
 {
@@ -97,15 +98,13 @@ int main(int argc, char** argv)
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//Implementation
-	if(Init->app_name.str=="App_Nanowire_Network_2D")
+	if(Init->app_name.str=="App_Electrical_Network_2D")
 	{
-		 //--------------------------------------------------------------------------------------------------
-		//Define an application to create a 2D network of nanowire
-//		App_NwNw_2D *NwNw2D =  new  App_NwNw_2D;
-//		int count = Init->simu_para.sample_num;
-		//Implement all samples
-//		for(int i=1; i<=count; i++)	if(NwNw2D->Create_conductive_network_2D(Init)==0) return 0;
-//		delete NwNw2D;
+		App_Network *NwNw = new  App_Network;
+		int count = Init->simu_para.sample_num;
+		// Implement all samples
+		for(int i=1; i<=count; i++)	if(NwNw->Create_conductive_network_2D(Init)==0) return 0;
+		delete NwNw;
 	}
 
     //-----------------------------------------------------------------------------------------------------------------------------------------

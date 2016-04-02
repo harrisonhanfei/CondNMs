@@ -1,33 +1,33 @@
 //====================================================================================
 //SOFTWARE:	Network of Eelectrically Conductive Nanocomposites (NECN)
 //CODE FILE:	App_Network_3D.cpp
-//OBJECTIVE:	Create conductive nanotube network in 3D separated by backbone paths, dead branches and isolated clusters
+//OBJECTIVE:	Create conductive nanowire network in 3D separated by backbone paths, dead branches and isolated clusters
 //AUTHOR:		Fei Han; Angel Mora
 //E-MAIL:			fei.han@kaust.edu.sa	;	angel.mora@kaust.edu.sa
 //====================================================================================
 
 #include "App_Network_2D.h"
 
-//Generate 3D conductive nanotube network separated by backbone paths, dead branches and isolated clusters
-int App_Network_3D::Create_conductive_network_2D(Input *Init)const
+//Generate 2D conductive nanowire network separated by backbone paths, dead branches and isolated clusters
+int App_Network::Create_conductive_network_2D(Input *Init)const
 {
 	//Time markers for total simulation
 	time_t ct0, ct1;
 	
-    vector<double> cnts_radius;						//Define the radius of each nanotube in the network
-    vector<Point_3D> cnts_point;					//Define the set of cnt point in a 1D vector
-    vector<vector<long int> > cnts_structure;		//The global number of points in the cnts
-    vector<vector<int> > shells_cnt;                //Shell sub-regions to make the triming faster
+    vector<double> cnts_radius;						//Define the radius of each nanowire in the network
+    vector<Point_2D> cnts_point;					//Define the set of cnt point in a 1D vector
+    vector<vector<int> > cnts_structure;		//The global number of points in the cnts
+//    vector<vector<int> > shells_cnt;                //Shell sub-regions to make the triming faster
     
     //-----------------------------------------------------------------------------------------------------------------------------------------
     //Network Generation with overlapping
-    hout << "-_- To generate nanotube network......" << endl;
+    hout << "-_- To generate nanowire network......" << endl;
     ct0 = time(NULL);
     GenNetwork *Genet = new GenNetwork;
-    if(Genet->Generate_nanowire_networks(Init->geom_rve, Init->cluster_geo, Init->nanotube_geo, Init->cutoff_dist, cnts_point, cnts_radius, cnts_structure)==0) return 0;
+    if(Genet->Generate_nanowire_networks(Init->geom_rve, Init->nanowire_geo, cnts_point, cnts_radius, cnts_structure)==0) return 0;
     delete Genet;
     ct1 = time(NULL);
-    hout << "Nanotube network generation time: " << (int)(ct1-ct0) <<" secs." << endl;
+    hout << "Nanowire network generation time: " << (int)(ct1-ct0) <<" secs." << endl;
     //Printer *P = new Printer;
     //P->Print_1d_vec(cnts_point, "cnts_point_00.txt");
  /* 
@@ -35,8 +35,8 @@ int App_Network_3D::Create_conductive_network_2D(Input *Init)const
 	ct0 = time(NULL);
     Background_vectors *Bckg = new Background_vectors;
     Geom_RVE geo = Init->geom_rve;
-    Nanotube_Geo nano = Init->nanotube_geo;
-    if (Bckg->Generate_shells_and_structure(Init->geom_rve, Init->nanotube_geo, cnts_point, shells_cnt)==0) return 0;
+    Nanowire_Geo nano = Init->nanowire_geo;
+    if (Bckg->Generate_shells_and_structure(Init->geom_rve, Init->nanowire_geo, cnts_point, shells_cnt)==0) return 0;
 	ct1 = time(NULL);
 	hout << "Generate shells and structure time: "<<(int)(ct1-ct0)<<" secs."<<endl;
     
@@ -58,7 +58,7 @@ int App_Network_3D::Create_conductive_network_2D(Input *Init)const
         Cutoff_Wins *Cutwins = new Cutoff_Wins;
         //From this function I get the internal variables cnts_inside and boundary_cnt
         ct0 = time(NULL);
-        if(Cutwins->Extract_observation_window(Init->geom_rve, Init->nanotube_geo, cnts_structure, cnts_radius, cnts_point, shells_cnt, i)==0) return 0;
+        if(Cutwins->Extract_observation_window(Init->geom_rve, Init->nanowire_geo, cnts_structure, cnts_radius, cnts_point, shells_cnt, i)==0) return 0;
         ct1 = time(NULL);
         hout << "Extract observation window time: "<<(int)(ct1-ct0)<<" secs."<<endl;
         
@@ -66,7 +66,7 @@ int App_Network_3D::Create_conductive_network_2D(Input *Init)const
         //Determine the local networks inside the cutoff windows
         Contact_grid *Contacts = new Contact_grid;
         ct0 = time(NULL);
-        if (Contacts->Generate_contact_grid(Init->geom_rve, Init->cutoff_dist, Init->nanotube_geo, Cutwins->cnts_inside, cnts_structure, cnts_point, i)==0) return 0;
+        if (Contacts->Generate_contact_grid(Init->geom_rve, Init->cutoff_dist, Init->nanowire_geo, Cutwins->cnts_inside, cnts_structure, cnts_point, i)==0) return 0;
         ct1 = time(NULL);
         hout << "Generate contact grid time: "<<(int)(ct1-ct0)<<" secs."<<endl;
         
@@ -74,15 +74,15 @@ int App_Network_3D::Create_conductive_network_2D(Input *Init)const
 		//Hoshen-Kopelman algorithm
 		Hoshen_Kopelman *HoKo = new Hoshen_Kopelman;
         ct0 = time(NULL);
-		if(HoKo->Determine_nanotube_clusters(Init->cutoff_dist, Cutwins->cnts_inside, Contacts->sectioned_domain, cnts_structure, cnts_point, cnts_radius)==0) return 0;
+		if(HoKo->Determine_nanowire_clusters(Init->cutoff_dist, Cutwins->cnts_inside, Contacts->sectioned_domain, cnts_structure, cnts_point, cnts_radius)==0) return 0;
         ct1 = time(NULL);
-        hout << "Determine nanotube clusters time: "<<(int)(ct1-ct0)<<" secs."<<endl;
+        hout << "Determine nanowire clusters time: "<<(int)(ct1-ct0)<<" secs."<<endl;
         
         //-----------------------------------------------------------------------------------------------------------------------------------------
         //Determine percolation
         Percolation *Perc = new Percolation;
         ct0 = time(NULL);
-        if (Perc->Determine_percolating_clusters(Init->geom_rve, Init->nanotube_geo, Cutwins->boundary_cnt, HoKo->labels, HoKo->labels_labels, HoKo->label_map, HoKo->clusters_cnt, HoKo->isolated, i)==0) return 0;
+        if (Perc->Determine_percolating_clusters(Init->geom_rve, Init->nanowire_geo, Cutwins->boundary_cnt, HoKo->labels, HoKo->labels_labels, HoKo->label_map, HoKo->clusters_cnt, HoKo->isolated, i)==0) return 0;
         ct1 = time(NULL);
         hout << "Determine percolating clusters time: "<<(int)(ct1-ct0)<<" secs."<<endl;
         
@@ -150,7 +150,7 @@ int App_Network_3D::Create_conductive_network_2D(Input *Init)const
 	return 1;
 }
 //Export tecplot files
-int App_Network_3D::Export_tecplot_files(const int &iter, const struct Geom_RVE &sample, const vector<Point_3D> &points_in, const vector<double> &radii, const vector<vector<long int> > &structure, const vector<vector<int> > &isolated, vector<vector<long int> > &all_dead_indices, const vector<vector<long int> > &all_indices)const
+/* int App_Network::Export_tecplot_files(const int &iter, const struct Geom_RVE &sample, const vector<Point_2D> &points_in, const vector<double> &radii, const vector<vector<long int> > &structure, const vector<vector<int> > &isolated, vector<vector<long int> > &all_dead_indices, const vector<vector<long int> > &all_indices)const
 {
     //These vectors will be used to create a structure-type vector to export to tecplot files
     vector<vector<long int> > percolated_tmp, dead_tmp;
@@ -249,9 +249,9 @@ int App_Network_3D::Export_tecplot_files(const int &iter, const struct Geom_RVE 
     
     return 1;
     
-}
+} */
 //
-int App_Network_3D::Convert_index_to_structure(const vector<long int> &indices, vector<vector<long int> > &structure)const
+/* int App_Network::Convert_index_to_structure(const vector<long int> &indices, vector<vector<long int> > &structure)const
 {
     //Empty vector
     vector<long int> empty;
@@ -263,5 +263,5 @@ int App_Network_3D::Convert_index_to_structure(const vector<long int> &indices, 
         }
     }
     return 1;
-}
+} */
 //===========================================================================

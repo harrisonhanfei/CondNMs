@@ -27,7 +27,7 @@ int Input::Read_Infile(ifstream &infile)
 		else if(str_temp=="Application_Name") { if(Read_application_name(app_name, infile)==0) return 0; }
 		else if(str_temp=="Simulation_Parameters")	{ if(Read_simulation_parameters(simu_para, infile)==0) return 0; }
 		else if(str_temp=="RVE_Geometry")	{ if(Read_rve_geometry(geom_rve, infile)==0) return 0; }
-		else if(str_temp=="Nanotube_Geometry")	{ if(Read_nanotube_geo_parameters(nanotube_geo, infile)==0) return 0; }
+		else if(str_temp=="Nanowire_Geometry")	{ if(Read_nanowire_geo_parameters(nanowire_geo, infile)==0) return 0; }
 		else if(str_temp=="Electrical_Parameters")	{ if(Read_electrical_paramters(electric_para, infile)==0) return 0; }
 		else 
 		{ 
@@ -37,15 +37,15 @@ int Input::Read_Infile(ifstream &infile)
 		}
 
 		//the real area of cnts in the RVE
-		if(geom_rve.mark&&nanotube_geo.mark)
+		if(geom_rve.mark&&nanowire_geo.mark)
 		{
-			//Calculate the real area of nanotubes
-			nanotube_geo.real_area = nanotube_geo.area_fraction * geom_rve.area;
-			//Define the extented RVE with one length of nanotube
-			geom_rve.ex_origin.x = geom_rve.origin.x - nanotube_geo.len_max;
-			geom_rve.ex_origin.y = geom_rve.origin.y - nanotube_geo.len_max;
-			geom_rve.ex_len = geom_rve.len_x + 2*nanotube_geo.len_max;
-			geom_rve.ey_wid = geom_rve.wid_y+ 2*nanotube_geo.len_max;
+			//Calculate the real area of nanowires
+			nanowire_geo.real_area = nanowire_geo.area_fraction * geom_rve.area;
+			//Define the extented RVE with one length of nanowire
+			geom_rve.ex_origin.x = geom_rve.origin.x - nanowire_geo.len_max;
+			geom_rve.ex_origin.y = geom_rve.origin.y - nanowire_geo.len_max;
+			geom_rve.ex_len = geom_rve.len_x + 2*nanowire_geo.len_max;
+			geom_rve.ey_wid = geom_rve.wid_y+ 2*nanowire_geo.len_max;
 		}
 	}
 
@@ -55,7 +55,7 @@ int Input::Read_Infile(ifstream &infile)
 	if(!app_name.mark) { cout << "Attention: \"Application_Name\" will use default parameters!" << endl; hout << "Attention: \"Application_Name\" will use default parameters!" << endl; }
 	if(!simu_para.mark) { cout << "Attention: \"Simulation_Parameters\" will use default parameters!" << endl; hout << "Attention: \"Simulation_Parameters\" will use default parameters!" << endl; }
 	if(!geom_rve.mark) { cout << "Attention: \"RVE_Geometry\" will use default parameters!" << endl; hout << "Attention: \"RVE_Geometry\" will use default parameters!" << endl; }
-	if(!nanotube_geo.mark) {	cout << "Attention: \"Nanotube_Geometry\" will use default parameters!" << endl; hout << "Attention: \"Nanotube_Geometry\" will use default parameters!" << endl; }	
+	if(!nanowire_geo.mark) {	cout << "Attention: \"Nanowire_Geometry\" will use default parameters!" << endl; hout << "Attention: \"Nanowire_Geometry\" will use default parameters!" << endl; }	
 	if(!electric_para.mark) {	cout << "Attention: \"Electrical_Parameters\" will use default parameters!" << endl; hout << "Attention: \"Electrical_Parameters\" will use default parameters!" << endl; }
 
 	return 1;
@@ -100,28 +100,26 @@ int Input::Data_Initialization()
 	geom_rve.win_delt_x = 1.0;
 	geom_rve.win_delt_y = 1.0;
 
-	//Initialize the geometric paramters of nanotubes
-	nanotube_geo.keywords = "Nanotube_Geometry";
-	nanotube_geo.mark = false;
-	nanotube_geo.dir_distrib_type = "random";
-	nanotube_geo.ini_pha = 0.0;
-	nanotube_geo.ini_sita = 0.0;
-	nanotube_geo.angle_max = 1.5707963267948966;
-	nanotube_geo.step_length = 0.01;
-	nanotube_geo.len_distrib_type = "uniform";
-	nanotube_geo.len_min = 1.0;
-	nanotube_geo.len_max = 1.0;
-	nanotube_geo.rad_distrib_type = "uniform";
-	nanotube_geo.rad_min = 0.005;
-	nanotube_geo.rad_max = 0.005;
-	nanotube_geo.criterion = "vol";
-	nanotube_geo.area_fraction = 0.0;
-	nanotube_geo.accum_mode = 0;
-	nanotube_geo.real_area = 0.0;
-	nanotube_geo.weight_fraction = 0.0;
-	nanotube_geo.real_weight = 0.0;
-	nanotube_geo.matrix_density = 1.06;
-	nanotube_geo.linear_density = 5.8E-5;
+	//Initialize the geometric paramters of nanowires
+	nanowire_geo.keywords = "Nanowire_Geometry";
+	nanowire_geo.mark = false;
+	nanowire_geo.dir_distrib_type = "random";
+	nanowire_geo.angle_max = 1.5707963267948966;
+	nanowire_geo.step_length = 0.01;
+	nanowire_geo.len_distrib_type = "uniform";
+	nanowire_geo.len_min = 1.0;
+	nanowire_geo.len_max = 1.0;
+	nanowire_geo.rad_distrib_type = "uniform";
+	nanowire_geo.rad_min = 0.005;
+	nanowire_geo.rad_max = 0.005;
+	nanowire_geo.criterion = "area";
+	nanowire_geo.area_fraction = 0.0;
+	nanowire_geo.accum_mode = 0;
+	nanowire_geo.real_area = 0.0;
+	nanowire_geo.weight_fraction = 0.0;
+	nanowire_geo.real_weight = 0.0;
+	nanowire_geo.matrix_density = 1.06;
+	nanowire_geo.linear_density = 5.8E-5;
 
 
 	//Initialize electrical parameters
@@ -266,99 +264,94 @@ int Input::Read_rve_geometry(struct Geom_RVE &geom_rve, ifstream &infile)
 	return 1;
 }
 //---------------------------------------------------------------------------
-//Reading the geometric parameters of nanotubes
-int Input::Read_nanotube_geo_parameters(struct Nanotube_Geo &nanotube_geo, ifstream &infile)
+//Reading the geometric parameters of nanowires
+int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstream &infile)
 {
-	if(nanotube_geo.mark)
+	if(nanowire_geo.mark)
 	{
-		cout << "Attention: \"" << nanotube_geo.keywords << "\" has been input!" << endl;
-		hout << "Attention: \"" << nanotube_geo.keywords << "\" has been input!" << endl;
+		cout << "Attention: \"" << nanowire_geo.keywords << "\" has been input!" << endl;
+		hout << "Attention: \"" << nanowire_geo.keywords << "\" has been input!" << endl;
 		return 0;
 	}
-	else nanotube_geo.mark = true;
+	else nanowire_geo.mark = true;
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
-	//Define the initial growth direction type (random or specific) in a RVE
+	//Define the orientational distribution type (random or specific) in a RVE
 	istringstream istr_initial_direction(Get_Line(infile));
-	istr_initial_direction >> nanotube_geo.dir_distrib_type;
-	if(nanotube_geo.dir_distrib_type!="random"&&nanotube_geo.dir_distrib_type!="specific"){ hout << "Error: the direction distribution type must be either random or specific." << endl;	return 0; }
-	if(nanotube_geo.dir_distrib_type=="specific")
+	istr_initial_direction >> nanowire_geo.dir_distrib_type;
+	if(nanowire_geo.dir_distrib_type!="random"&&nanowire_geo.dir_distrib_type!="specific"){ hout << "Error: the direction distribution type must be either random or specific." << endl;	return 0; }
+	if(nanowire_geo.dir_distrib_type=="specific")
 	{
-		istr_initial_direction  >> nanotube_geo.ini_sita >> nanotube_geo.ini_pha;
-		if(nanotube_geo.ini_sita<0||nanotube_geo.ini_sita>PI||nanotube_geo.ini_pha<0||nanotube_geo.ini_pha>=2*PI)
+		istr_initial_direction  >> nanowire_geo.angle_max;
+		if(nanowire_geo.angle_max<0||nanowire_geo.angle_max>(PI/2))
 		{
 			hout << "Error: the specified angle is not in the acceptable range of (0, 2PI)." << endl;
 			return 0;
 		}
 	}
 
-	//-----------------------------------------------------------------------------------------------------------------------------------------
-	//Define the normal distribution range [-omega, omega] of the growth direction
-	istringstream istr_angle_range(Get_Line(infile));
-	istr_angle_range >> nanotube_geo.angle_max;
-	if(nanotube_geo.angle_max>0.5*PI){ hout << "Error: the specified angle is not in the acceptable range of (-PI/2, PI/2)." << endl;	 return 0; }
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
-	//Define the step length (unit: micromether) of nanotube growth
+	//Define the step length (unit: micromether) of nanowire growth
 	istringstream istr_step_len(Get_Line(infile));
-	istr_step_len >> nanotube_geo.step_length;
-	if(nanotube_geo.step_length<=0||
-	   nanotube_geo.step_length>=0.25*geom_rve.len_x||
-	   nanotube_geo.step_length>=0.25*geom_rve.wid_y)
+	istr_step_len >> nanowire_geo.step_length;
+	if(nanowire_geo.step_length<=0||
+	   nanowire_geo.step_length>=0.25*geom_rve.len_x||
+	   nanowire_geo.step_length>=0.25*geom_rve.wid_y)
 	{ hout << "Error: the step length must be positive and 0.25 times lesser than the dimension of the RVE box." << endl;	return 0; }
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
-    //Define the distribution type (uniform or normal) of the length (unit: micromether) of nanotubes and the length range (min, max) of nanotubes in a RVE
+    //Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires and the length range (min, max) of nanowires in a RVE
     istringstream istr_cnt_len(Get_Line(infile));
-    istr_cnt_len >> nanotube_geo.len_distrib_type;
-    if(nanotube_geo.len_distrib_type!="uniform"&&nanotube_geo.len_distrib_type!="normal"){ hout << "Error: the distribution of the length should be either normal or uniform." << endl;	return 0; }
-    istr_cnt_len >> nanotube_geo.len_min >> nanotube_geo.len_max;
-    if(nanotube_geo.len_min<0||nanotube_geo.len_max<0||nanotube_geo.len_max<nanotube_geo.len_min){ hout << "Error: the length must be non-negative and min must be smaller than max." << endl; return 0; }
+    istr_cnt_len >> nanowire_geo.len_distrib_type;
+    if(nanowire_geo.len_distrib_type!="uniform"&&nanowire_geo.len_distrib_type!="normal"){ hout << "Error: the distribution of the length should be either normal or uniform." << endl;	return 0; }
+    istr_cnt_len >> nanowire_geo.len_min >> nanowire_geo.len_max;
+    if(nanowire_geo.len_min<0||nanowire_geo.len_max<0||nanowire_geo.len_max<nanowire_geo.len_min){ hout << "Error: the length must be non-negative and min must be smaller than max." << endl; return 0; }
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
-	//Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanotubes and the radius range (min, max) of nanotubes in a RVE
+	//Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires and the radius range (min, max) of nanowires in a RVE
     istringstream istr_cnt_rad(Get_Line(infile));
-    istr_cnt_rad >> nanotube_geo.rad_distrib_type;
-    if(nanotube_geo.rad_distrib_type!="uniform"&&nanotube_geo.rad_distrib_type!="normal"){ hout << "Error: the distribution of the radius should be either normal or uniform." << endl;	return 0; }
-    istr_cnt_rad >> nanotube_geo.rad_min >> nanotube_geo.rad_max;
-    if(nanotube_geo.rad_min<0||nanotube_geo.rad_max<0||nanotube_geo.rad_max<nanotube_geo.rad_min||
-	   nanotube_geo.rad_min>3*nanotube_geo.step_length||nanotube_geo.rad_max>0.05*nanotube_geo.len_min)
+    istr_cnt_rad >> nanowire_geo.rad_distrib_type;
+    if(nanowire_geo.rad_distrib_type!="uniform"&&nanowire_geo.rad_distrib_type!="normal"){ hout << "Error: the distribution of the radius should be either normal or uniform." << endl;	return 0; }
+    istr_cnt_rad >> nanowire_geo.rad_min >> nanowire_geo.rad_max;
+    if(nanowire_geo.rad_min<0||nanowire_geo.rad_max<0||nanowire_geo.rad_max<nanowire_geo.rad_min||
+	   nanowire_geo.rad_min>3*nanowire_geo.step_length||nanowire_geo.rad_max>0.05*nanowire_geo.len_min)
 	{ hout << "Error: the radius must be non-negative, min must be smaller than max, min must be smaller than 3*step_length and max must be smaller than 0.05*len_min." << endl; return 0; }
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
-	//Define the volume or weight fraction of nanotubes in the RVE
+	//Define the area or weight fraction of nanowires in the RVE
 	istringstream istr_cnt_vol(Get_Line(infile));
-	istr_cnt_vol >> nanotube_geo.criterion;
-	if(nanotube_geo.criterion=="area")
+	istr_cnt_vol >> nanowire_geo.criterion;
+	if(nanowire_geo.criterion=="area")
 	{
-		istr_cnt_vol >> nanotube_geo.area_fraction;
-		if(nanotube_geo.area_fraction>1||nanotube_geo.area_fraction<0){ hout << "Error: the area fraction must be between 0 and 1." << endl; return 0; }
-		hout << "    The area fraction is "<< nanotube_geo.area_fraction << endl;
+		istr_cnt_vol >> nanowire_geo.area_fraction;
+		if(nanowire_geo.area_fraction>1||nanowire_geo.area_fraction<0){ hout << "Error: the area fraction must be between 0 and 1." << endl; return 0; }
+		hout << "    The area fraction is "<< nanowire_geo.area_fraction << endl;
         
-		istr_cnt_vol >> nanotube_geo.accum_mode;
-		if(nanotube_geo.accum_mode<0&&nanotube_geo.accum_mode>2){ hout <<"Error: the mode of accumulation should be between 0 and 2." << endl; return 0; }
+		istr_cnt_vol >> nanowire_geo.accum_mode;
+		if(nanowire_geo.accum_mode<0&&nanowire_geo.accum_mode>2){ hout <<"Error: the mode of accumulation should be between 0 and 2." << endl; return 0; }
         
-		//The total volume of the nanotube network
-		nanotube_geo.real_area = nanotube_geo.area_fraction*geom_rve.area;
+		//The total volume of the nanowire network
+		nanowire_geo.real_area = nanowire_geo.area_fraction*geom_rve.area;
 	}
-	else if(nanotube_geo.criterion=="wt")
+	else if(nanowire_geo.criterion=="wt")
 	{
-		istr_cnt_vol >> nanotube_geo.weight_fraction;
-		if(nanotube_geo.weight_fraction>1||nanotube_geo.weight_fraction<0){ hout << "Error: the area fraction must be between 0 and 1." << endl; return 0; }
-		hout << "    The weight fraction is " << nanotube_geo.weight_fraction << endl;
+		istr_cnt_vol >> nanowire_geo.weight_fraction;
+		if(nanowire_geo.weight_fraction>1||nanowire_geo.weight_fraction<0){ hout << "Error: the area fraction must be between 0 and 1." << endl; return 0; }
+		hout << "    The weight fraction is " << nanowire_geo.weight_fraction << endl;
         
-		istr_cnt_vol >> nanotube_geo.accum_mode;
-		if(nanotube_geo.accum_mode<0&&nanotube_geo.accum_mode>2){ hout <<"Error: the mode of accumulation should be between 0 and 2." << endl; return 0;  }
+		istr_cnt_vol >> nanowire_geo.accum_mode;
+		if(nanowire_geo.accum_mode<0&&nanowire_geo.accum_mode>2){ hout <<"Error: the mode of accumulation should be between 0 and 2." << endl; return 0;  }
         
-		istr_cnt_vol >> nanotube_geo.linear_density;		//Read the linear density of a nanotube
-		if(nanotube_geo.linear_density<0){ hout << "Error: the linear density of a nanotube should be non-nagetive." << endl; return 0; }
+		istr_cnt_vol >> nanowire_geo.linear_density;		//Read the linear density of a nanowire
+		if(nanowire_geo.linear_density<0){ hout << "Error: the linear density of a nanowire should be non-nagetive." << endl; return 0; }
 		
-		istr_cnt_vol >> geom_rve.density;	 //Read the density of RVE. Here we ignore the volume of nantubes, so the density of RVE actually approximates to the density of matix
+		istr_cnt_vol >> geom_rve.density;	 //Read the density of RVE. Here we ignore the volume of nanwires, so the density of RVE actually approximates to the density of matix
 		if(geom_rve.density<0){ hout << "Error: the density of RVE should be non-nagetive." << endl; return 0; }
-		if(nanotube_geo.linear_density>=nanotube_geo.matrix_density){ hout << "Error: the density of matrix or the linear density of a nanotube is wrong." << endl; return 0; }
+		if(nanowire_geo.linear_density>=nanowire_geo.matrix_density){ hout << "Error: the density of matrix or the linear density of a nanowire is wrong." << endl; return 0; }
         
-		//The real weight of nanotubes
-		nanotube_geo.real_weight = nanotube_geo.weight_fraction*geom_rve.area*geom_rve.density;
+		//The real weight of nanowires
+		nanowire_geo.real_weight = nanowire_geo.weight_fraction*geom_rve.area*geom_rve.density;
 	}
 	else { hout << "Error: the criterian of generation is neither 'area' nor 'wt'." << endl; return 0; }
 

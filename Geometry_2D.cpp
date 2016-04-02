@@ -64,12 +64,13 @@ Point_2D Point_2D::operator/( double d )
 	return rp;
 }
 //---------------------------------------------------------------------------
-bool Point_2D::operator==( Point_2D &pt )
+bool Point_2D::operator==(const Point_2D &pt )
 {
 	return (x==pt.x&&y==pt.y);
 }
 //---------------------------------------------------------------------------
-bool Point_2D::operator!=( Point_2D &pt )
+//---------------------------------------------------------------------------
+bool Point_2D::operator!=(const Point_2D &pt )
 {
 	return (x!=pt.x||y!=pt.y);
 }
@@ -87,7 +88,7 @@ double Point_2D::distance_to(const double &px, const double &py)const
 }
 //===========================================================================
 
-//The member function for the 3D line class
+//The member function for the 2D line class
 //---------------------------------------------------------------------------
 //Constructor
 Line_2D::Line_2D(Point_2D p0, Point_2D p1)

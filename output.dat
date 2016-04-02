@@ -1,0 +1,43 @@
+
+**********************************************
+                   NwNw_2D   v0.1								
+ 																			
+           Fei Han            Thirupathi Maloth				
+ 																			
+      Propriety of KAUST/COHMAS Laboratory	
+  fei.han@kaust.edu.sa  thirupathi.maloth@kaust.edu.sa	
+**********************************************
+
+
+======================================================
+-_- Input file reader......
+^_^ Data initialization achieves
+
+Reading input file...
+    The area fraction is 0.5
+Reading the keywords is finished!
+    Operation done in 0secs.
+^_^ Input achieves
+
+-_- To generate nanowire network......
+    The area fraction of generated CNTs is about : 0.500147
+There are 481 CNTs.
+There are 962 points.
+Nanowire network generation time: 0 secs.
+
+*******************************************************************
+    The simulation took 0secs.
+^_^ End of simulation 
+*******************************************************************
+
+
+**********************************************
+              Hope it helped ;)											
+ 																				
+           Fei Han            Thirupathi Maloth							
+ 																				
+      Propriety of KAUST/COHMAS Laboratory		
+  fei.han@kaust.edu.sa  thirupathi.maloth@kaust.edu.sa		
+**********************************************
+
+

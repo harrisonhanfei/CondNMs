@@ -44,7 +44,7 @@ struct Geom_RVE{
 			string keywords;
 			bool mark;
 			Point_2D origin;												//Define an origin point for a RVE
-			double len_x, wid_y;								//Define length, width for an extended RVE for generation with an acurrate control 
+			double len_x, wid_y;								//Define length, width for an  RVE for generation with an acurrate control 
 			Point_2D ex_origin;											//Define an origin point for an extended RVE to generate network with an acurrate control  
 			double ex_len, ey_wid;							//Define length, width for an extended RVE for generation with an acurrate control  
 			double area;
@@ -55,25 +55,24 @@ struct Geom_RVE{
 			double win_delt_x, win_delt_y;
 			int cut_num;														//Define the number of cutoff times (0: the maxmum size, n: the maxmum size - n*step_length(delta), n>=1)
 		};
-//The nanotube parameters in a network
-struct Nanotube_Geo{
+//The nanowire parameters in a network
+struct Nanowire_Geo{
 			string keywords;
 			bool mark;
-			string criterion;						//Define the area or weight fraction of nanotubes in the RVE: vol, wt, nwt
+			string criterion;						//Define the area or weight fraction of nanowires in the RVE: vol, wt, nwt
 			string dir_distrib_type;			//Define the initial growth direction type (random or specific) in a RVE
-			string len_distrib_type;			//Define the distribution type (uniform or normal) of the length (unit: micromether) of nanotubes
-			string rad_distrib_type;			//Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanotubes
-			double step_length;				//Define the step length (unit: micromether) of nanotube growth
-			double ini_sita, ini_pha;			//Define initial direction for 'specific' type in the spherical coordinates
-			double angle_max;				//Define the angle 'omega' for the normal distribution range [-omega, omega] of the growth direction
-			double len_min, len_max;		//Define the length range (min, max) of nanotubes
-			double rad_min, rad_max;		//Define the radius range (min,max) of nanotubes
-			double area_fraction;		//Define the volume fraction of nanotubes
+			string len_distrib_type;			//Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires
+			string rad_distrib_type;			//Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires
+			double step_length;				//Define the step length (unit: micromether) of nanowire growth
+			double angle_max;				//Define the angle 'omega' which is the bound for a given orientational distribution type
+			double len_min, len_max;		//Define the length range (min, max) of nanowires
+			double rad_min, rad_max;		//Define the radius range (min,max) of nanowires
+			double area_fraction;		//Define the area fraction of nanowires
 			int accum_mode;					//Define the mode of accumulator (0: no accumu; 1: linear accum as sample number; 2: square exponential accum as sample (number-1))
-			double real_area;				// Define the real area of nanotubes
-			double weight_fraction;			//Define the weight fraction of nanotubes
-			double real_weight;				//Define the real weight of nanotubes
-			double linear_density;			//Define the linear density of nanotubes
+			double real_area;				// Define the real area of nanowires
+			double weight_fraction;			//Define the weight fraction of nanowires
+			double real_weight;				//Define the real weight of nanowires
+			double linear_density;			//Define the linear density of nanowires
 			double matrix_density;			//Define the density of matrix
 		};
 //The electrical parameters
@@ -92,9 +91,7 @@ class Input
 		struct App_name app_name;
 		struct Simu_para simu_para;
 		struct Geom_RVE geom_rve;
-		struct Nanotube_Geo nanotube_geo;
-//		struct Cluster_Geo cluster_geo;
-//		struct Cutoff_dist cutoff_dist;
+		struct Nanowire_Geo nanowire_geo;
 		struct Electric_para electric_para;
 
 		//Constructor
@@ -109,7 +106,7 @@ private:
 		int Read_application_name(struct App_name &app_name, ifstream &infile);
 		int Read_simulation_parameters(struct Simu_para &simu_para, ifstream &infile);
 		int Read_rve_geometry(struct Geom_RVE &geom_rve, ifstream &infile);
-		int Read_nanotube_geo_parameters(struct Nanotube_Geo &nanotube_geo, ifstream &infile);
+		int Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstream &infile);
 		int Read_electrical_paramters(struct Electric_para &electric_para, ifstream &infile);
 };
 //---------------------------------------------------------------------------

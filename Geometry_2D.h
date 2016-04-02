@@ -40,8 +40,8 @@ class Point_2D
         Point_2D operator-( const Point_2D &pt );
         Point_2D operator*( double d );
         Point_2D operator/( double d );
-		bool operator==( Point_2D &pt );
-		bool operator!=( Point_2D &pt );
+		bool operator==(const Point_2D &pt );
+		bool operator!=(const Point_2D &pt );
         double distance_to(const Point_2D &pt)const;
 		double distance_to(const double &px, const double &py)const;
 };
