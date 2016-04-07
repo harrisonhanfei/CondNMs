@@ -22,7 +22,7 @@ using namespace hns;
 #include "Gauss.h"
 #include "Geometry_2D.h"
 
-const double PI = 3.1415926535897932384626433832795;
+const double PI = 3.1415926535897932;
 
 //---------------------------------------------------------------------------
 //Name of application case
@@ -63,12 +63,12 @@ struct Nanowire_Geo{
 			string dir_distrib_type;			//Define the initial growth direction type (random or specific) in a RVE
 			string len_distrib_type;			//Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires
 			string rad_distrib_type;			//Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires
-			double angle_max;				//Define the angle 'omega' which is the bound for a given orientational distribution type
+			double angle_min, angle_max;	//Define the angle range of nanowires which is the bound for a given orientational distribution type
 			double len_min, len_max;		//Define the length range (min, max) of nanowires
 			double rad_min, rad_max;		//Define the radius range (min,max) of nanowires
-			double area_fraction;		//Define the area fraction of nanowires
+			double area_fraction;				//Define the area fraction of nanowires
 			int accum_mode;					//Define the mode of accumulator (0: no accumu; 1: linear accum as sample number; 2: square exponential accum as sample (number-1))
-			double real_area;				// Define the real area of nanowires
+			double real_area;					// Define the real area of nanowires
 			double weight_fraction;			//Define the weight fraction of nanowires
 			double real_weight;				//Define the real weight of nanowires
 			double linear_density;			//Define the linear density of nanowires

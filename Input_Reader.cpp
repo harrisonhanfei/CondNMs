@@ -279,17 +279,14 @@ int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstr
 	//Define the orientational distribution type (random or specific) in a RVE
 	istringstream istr_initial_direction(Get_Line(infile));
 	istr_initial_direction >> nanowire_geo.dir_distrib_type;
-	if(nanowire_geo.dir_distrib_type!="random"&&nanowire_geo.dir_distrib_type!="specific"){ hout << "Error: the direction distribution type must be either random or specific." << endl;	return 0; }
-	if(nanowire_geo.dir_distrib_type=="specific")
+	if(nanowire_geo.dir_distrib_type!="random"&&nanowire_geo.dir_distrib_type!="normal"){ hout << "Error: the direction distribution type must be either random or normal." << endl;	return 0; }
+	istr_initial_direction  >> nanowire_geo.angle_min >> nanowire_geo.angle_max;	
+	if(nanowire_geo.angle_min<-PI||nanowire_geo.angle_max>PI||
+	   nanowire_geo.angle_min>nanowire_geo.angle_max||(nanowire_geo.angle_max-nanowire_geo.angle_min)>(PI+Zero))
 	{
-		istr_initial_direction  >> nanowire_geo.angle_max;
-		if(nanowire_geo.angle_max<0||nanowire_geo.angle_max>(PI/2))
-		{
-			hout << "Error: the specified angle is not in the acceptable range of (0, 2PI)." << endl;
-			return 0;
-		}
+		hout << "Error: the angle paramters are not in the acceptable range or incorect input." << endl;
+		return 0;
 	}
-
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//-----------------------------------------------------------------------------------------------------------------------------------------
@@ -307,8 +304,8 @@ int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstr
     if(nanowire_geo.rad_distrib_type!="uniform"&&nanowire_geo.rad_distrib_type!="normal"){ hout << "Error: the distribution of the radius should be either normal or uniform." << endl;	return 0; }
     istr_cnt_rad >> nanowire_geo.rad_min >> nanowire_geo.rad_max;
     if(nanowire_geo.rad_min<0||nanowire_geo.rad_max<0||nanowire_geo.rad_max<nanowire_geo.rad_min||
-	   nanowire_geo.rad_max>0.05*nanowire_geo.len_min)
-	{ hout << "Error: the radius must be non-negative, min must be smaller than max and max must be smaller than 0.05*len_min." << endl; return 0; }
+	   nanowire_geo.rad_max>0.5*nanowire_geo.len_min)
+	{ hout << "Error: the radius must be non-negative, min must be smaller than max and max must be smaller than 0.5*len_min." << endl; return 0; }
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//Define the area or weight fraction of nanowires in the RVE

@@ -21,27 +21,29 @@ class Tecplot_Export
 		//Constructor
 		Tecplot_Export(){};
 
-		/* //Member Functions
-		//The geometric structure of CNT network (by quadrilaterial elements in Tecplot)
-		int Export_cnt_network_meshes(const Rectangle &cub, const vector<vector<Point_2D> > &cnts_points, const vector<double> &cnts_radius)const;
+		//Member Functions
 		//The geometric structure of CNT network (by threads in Tecplot) in a rectangle
-		int Export_network_threads(const Rectangle &cub, const vector<vector<Point_2D> > &cnts_points)const;
+		int Export_network_threads_2D(const Rectangle &exrect, const vector<vector<Point_2D> > &cnts_points)const;
+		//The geometric structure of CNT network (by quadrilaterial elements in Tecplot)
+		int Export_cnt_network_meshes(const struct cuboid &cub, const vector<vector<Point_3D> > &cnts_points, const vector<double> &cnts_radius)const;
         //The geometric structure of CNT network (by quadrilaterial elements in Tecplot) with a specific filename. This function uses a 1D point vector and a 2D structure vector that references the point vector
-        int Export_cnt_network_meshes(const Rectangle &cub, const vector<Point_2D> &cnts_points, const vector<double> &cnts_radius, const vector<vector<long int> > &structure, string filename)const;
+        int Export_cnt_network_meshes(const struct cuboid &cub, const vector<Point_3D> &cnts_points, const vector<double> &cnts_radius, const vector<vector<long int> > &structure, string filename)const;
 
 	private:
-		//Export a 3D rectangle
-		int Export_rectangle(ofstream &otec, const Rectangle &cub)const;
-		//Export 3D nanotube threads
-		int Export_nano_threads(ofstream &otec, const vector<vector<Point_2D> > &cnts_points)const;
+		//Export a 3D cuboid
+		int Export_cuboid_quasi2D(ofstream &otec, const struct cuboid &cub)const;
+		//Export a 2D rectangle
+		int Export_rectangle(ofstream &otec, const Rectangle &cell)const;
+		//Export 2D nanotube threads
+		int Export_nano_threads_2D(ofstream &otec, const vector<vector<Point_2D> > &cnts_points)const;
 		//Export nanotube network by tetrahedron elements (Multiple zones in tecplot: each nanotube by one zone)
-		int Export_cnts_meshes_multizones(const Rectangle &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles)const;
+		int Export_cnts_meshes_multizones(const struct cuboid &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles)const;
 		//Export nanotube network by tetrahedron elements (Single zones in tecplot: all nanotubes by one zone)
-		int Export_cnts_meshes_singlezone(const Rectangle &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles)const;
+		int Export_cnts_meshes_singlezone(const struct cuboid &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles)const;
         //Export nanotube network by tetrahedron elements (Multiple zones in tecplot: each nanotube by one zone) with a specific filename
-        int Export_cnts_meshes_multizones(const Rectangle &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles, string filename)const;
+        int Export_cnts_meshes_multizones(const struct cuboid &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles, string filename)const;
         //Export nanotube network by tetrahedron elements (Single zones in tecplot: all nanotubes by one zone) with a specific filename
-        int Export_cnts_meshes_singlezone(const Rectangle &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles, string filename)const; */
+        int Export_cnts_meshes_singlezone(const struct cuboid &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles, string filename)const;
 };
 //-------------------------------------------------------
 #endif

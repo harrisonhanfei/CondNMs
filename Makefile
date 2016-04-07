@@ -1,5 +1,5 @@
 #  Declaration
-CXXFLAGS = -Wall -v -O3 
+CXXFLAGS = -Wall -v -O3 -std=c++0x
 PARFLAGS = -fopenmp
 CC	=	gcc
 C++	=	g++
@@ -22,8 +22,8 @@ F77    	=	f77
 	${CC} ${CFLAGS} $< -c
 
 
-objects =  App_Network_2D.o Fem_3D.o Gauss.o GenNetwork_2D.o Geometry_2D.o Hns.o Input_Reader.o \
-           	  MathMatrix.o Tecplot_Export.o MainPro.o \
+objects =  App_Network_2D.o Fem_3D.o Gauss.o GenNetwork_2D.o Geometry_2D.o Geometry_3D.o \
+           	  Hns.o Input_Reader.o MathMatrix.o Tecplot_Export.o MainPro.o \
 	                   
 necn : $(objects)        
 	${C++} ${PARFLAGS} -o necn $(objects)

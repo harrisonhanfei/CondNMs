@@ -51,12 +51,12 @@ RVE_Geometry
 %Define the geometric parameters of nanowires
 Nanowire_Geometry
 %--------------------------------To start
-%Define the orientational distribution type (random or specific) in a RVE
-%If you input "random", that means orientational distribution of nanowires is isotropic
-%If you input "specific", You can opt for anisotropic orientational distribution  theta =[-th_max th_max] 
-%th_max = 0.0 -> Fully anisotropic; th_max =PI/2 -> Fully isotropic
-random
-%specific PI/4
+%Define the orientational distribution type (random or normal) in an angle range
+%This angel range is in [angle_min, angle_max], where -PI <= angle_min <= angle_max<=PI and (angle_max-angle_min) <= PI
+%The angel (angle_min or angle_max) is input by arc values
+%If you input "normal", the angle nanowires satisfies the normal distribution around (angle_min + angle_max)/2
+random -1.5707963267948966 1.5707963267948966
+%normal -0.7853981633974483 0.7853981633974483
 %----------------------------------------------------------------------------------------------------------------------------------------------------------
 %PI/2=1.5707963267948966; PI/4=0.7853981633974483; PI/6=0.5235987755982989; PI/12=0.2617993877991494; PI/36=0.087266462599716479; PI/60=0.05235987755982981
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -65,18 +65,18 @@ random
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires and the length range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
-uniform 0.0200000 0.0200000
+uniform 0.8 0.8
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires and the radius range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
-uniform 0.0005000 0.0005000
+uniform 0.005 0.005
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the area or weight fraction of nanowires in the RVE
 %If you input "area", the area fraction is the criterion and the mode of accumulation, for example: area 0.01 0
 %or if you input "wt", the weight fraction is the criterion and the mode of accumulation and the linear density (1E-12g/'nu'm) of CNT and the density (1E-12g/'nu'm^3)of polymer are needed.
 %the mode of accumulation: 0 means every sample uses the same fraction; 1 or 2 mean every sample uses the accumulated fraction by different ways
 %nwt 0.005 0 5.8E-5 1.06
-area 0.5000 0
+area 0.05 0
 %--------------------------------To end
 %
 %

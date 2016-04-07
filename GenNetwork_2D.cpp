@@ -8,8 +8,9 @@
 
 #include "GenNetwork_2D.h"
 #include "Geometry_2D.h"
+#include "Geometry_3D.h"
 
-//Generate 2D nanwire networks with ovelapping
+//Generate 2D nanowire networks with ovelapping
 int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, const struct Nanowire_Geo &nanowire_geo, vector<Point_2D> &cpoints, vector<double> &cnts_radius, vector<vector<int> > &cstructures)const
 {
 	// Define a vector of vectors for storing the cartesian coordinates of nanowires
@@ -19,8 +20,68 @@ int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, cons
     //-----------------------------------------------------------------------------------------------------------------------------------------
     //Transform the 2D cnts_points into 1D cpoints and 2D cstructuers
     if (Transform_cnts_points(cnts_points, cpoints, cstructures)==0) return 0;	
-	
-	
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    //A new class of Tecplot_Export
+    Tecplot_Export *Tecexpt = new Tecplot_Export;
+     
+	//Generate a rectangle for RVE
+	Rectangle exrect(geom_rve.ex_origin, geom_rve.ex_len, geom_rve.ey_wid);
+     
+     //The geometric structure of CNT network (by threads in Tecplot)
+     if(Tecexpt->Export_network_threads_2D(exrect, cnts_points)==0) return 0;
+     
+	 //Find the max cnt radius
+	 double max_rad = 0;
+	 for(int i=0; i<(int)cnts_radius.size(); i++)
+	 {
+		 if(max_rad<cnts_radius[i]) max_rad = cnts_radius[i];
+	 }
+
+	 //Generate a cuboid for RVE
+	 struct cuboid cub;
+     cub.poi_min.x = geom_rve.ex_origin.x;
+     cub.poi_min.y = geom_rve.ex_origin.y;
+	 cub.poi_min.z = 0.0;
+     cub.len_x = geom_rve.ex_len;
+     cub.wid_y = geom_rve.ey_wid;
+	 cub.hei_z = 2*max_rad;
+
+	//Define a vector of vectors for qusi2D output
+    vector<vector<Point_3D> > cnts_3Dpois;
+	 for(int i=0; i<(int)cnts_points.size(); i++)
+	 {
+		vector<Point_3D> vec_3dps;
+		//first point
+		Point_3D temp_poi(cnts_points[i][0].x, cnts_points[i][0].y, max_rad);
+		vec_3dps.push_back(temp_poi);
+
+		//middle points
+		//double x0 = cnts_points[i][0].x;
+		//double deltx = cnts_points[i][1].x - cnts_points[i][0].x;
+		//double y0 = cnts_points[i][0].y;
+		//double delty = cnts_points[i][1].y - cnts_points[i][0].y;
+		//for(int j=1; j<10; j++)
+		//{
+		//	temp_poi.x = x0+deltx*j*0.1;
+		//	temp_poi.y = y0+delty*j*0.1;
+		//	temp_poi.z = max_rad;
+		//	vec_3dps.push_back(temp_poi);
+		//}
+
+		//end point
+		temp_poi.x = cnts_points[i][1].x;
+		temp_poi.y = cnts_points[i][1].y;
+		temp_poi.z = max_rad;
+		vec_3dps.push_back(temp_poi);
+		 
+		//push_back
+		cnts_3Dpois.push_back(vec_3dps);
+	 }
+
+     //The geometric structure of CNT network (by tetrahedron meshes in Tecplot)
+	 //Attention: little parts of nanotube volumes out of the rectangle
+     if(Tecexpt->Export_cnt_network_meshes(cub, cnts_3Dpois, cnts_radius)==0) return 0;
+
 	return 1;
 }	
 //Generate a network defined by points and connections
@@ -36,7 +97,7 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     
     //---------------------------------------------------------------------------
     //Set up the Mersenne Twisters used for the different variables
-    // Use random_device to generate a seed for Mersenne twister engine.
+    //Use random_device to generate a seed for Mersenne twister engine.
     std::random_device rd;
     // Use Mersenne twister engine to generate pseudo-random numbers.
     //Generate differnet engines for different variables
@@ -44,7 +105,7 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     std::mt19937 engine_y(rd());
     std::mt19937 engine_pha(rd());
 	
-    // "Filter" MT's output to generate double values, uniformly distributed on the closed interval [0, 1].
+    //"Filter" MT's output to generate double values, uniformly distributed on the closed interval [0, 1].
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 	
     double area_sum = 0;  //the sum of area of generated CNTs
@@ -71,13 +132,13 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     //Generate Rectangles that represent the extended domain and the composite domain
     //To calculate the effective portion (length) which falls into the given region (RVE)
 	//generate a Rectangle to represent the composite domain
-	Rectangle gvcub(geom_rve.origin,geom_rve.len_x,geom_rve.wid_y);
+	Rectangle gvcub(geom_rve.origin, geom_rve.len_x, geom_rve.wid_y);
 	//generate a Rectangle to represent the extended domain
-	Rectangle excub(geom_rve.ex_origin,geom_rve.ex_len,geom_rve.ey_wid);
+	Rectangle excub(geom_rve.ex_origin, geom_rve.ex_len, geom_rve.ey_wid);
 
-	    //--------------- GENERATING SEEDS RANDOMLY AND THEN THE END POINT UNTIL AREA_SUM IS REACHED -----------
+	//--------------- GENERATING SEEDS RANDOMLY AND THEN THE END POINT UNTIL AREA_SUM IS REACHED -----------
     while((nanowire_geo.criterion == "area"&&area_sum < nanowire_geo.real_area)||
-          (nanowire_geo.criterion == "wt"&&wt_sum < nanowire_geo.real_weight))
+			(nanowire_geo.criterion == "wt"&&wt_sum < nanowire_geo.real_weight))
     {
         //---------------------------------------------------------------------------
         //Define two points for a new nanowire
@@ -94,7 +155,7 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
         if(Get_random_value_mt(nanowire_geo.rad_distrib_type, engine_pha, dist, nanowire_geo.rad_min, nanowire_geo.rad_max, cnt_rad)==0) return 0;
         
         //---------------------------------------------------------------------------
-        //Randomly generate the orientation of the nanowire 'Pha' is the orintation of the nanowire (-PI/2,PI/2)
+        //Randomly generate the orientation of the nanowire 'Pha' is the orintation of the nanowire (-PI/2, PI/2)
         double cnt_pha;
         if(Get_uniform_direction_mt(nanowire_geo, cnt_pha, engine_pha, dist)==0) return 0;
 		
@@ -108,23 +169,21 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
         Point_2D cnt_poi;
         if(Get_seed_point_mt(excub, cnt_poi, engine_x, engine_y, dist)==0) return 0;
 		
-		int counter=1;
-        //Check overlapping of the initial point 	
-		 while(!Check_overlapping(Cnts_points, cnt_poi)) {
-            if(Get_seed_point_mt(excub, cnt_poi, engine_x, engine_y, dist)==0) return 0;
-            cnt_seed_count++;					//record the number of seed generations
-            //hout << "Seed deleted" << endl;
-            if (counter == MAX_ATTEMPTS) {
-                hout << "Too many attempts to resolve overlapping of an intial CNT point (" << counter << " attempts). ";
-                hout << cnt_poi.x << ' ' << cnt_poi.y << endl;
-                return 0;
-            }
-            counter ++;
-		} 
-		
+		//int counter=1;
+  //      //Check overlapping of the initial point 	
+		//while(!Check_overlapping(Cnts_points, cnt_poi)) {
+		//	if(Get_seed_point_mt(excub, cnt_poi, engine_x, engine_y, dist)==0) return 0;
+  //          cnt_seed_count++;					//record the number of seed generations
+  //          //hout << "Seed deleted" << endl;
+  //          if (counter == MAX_ATTEMPTS) {
+  //              hout << "Too many attempts to resolve overlapping of an intial CNT point (" << counter << " attempts). ";
+  //              hout << cnt_poi.x << ' ' << cnt_poi.y << endl;
+  //              return 0;
+  //          }
+  //          counter ++;
+		//} 
 		
         new_cnt[0] = cnt_poi;	//store this seed point in the array for a new nanowire
-		
         //---------------------------------------------------------------------------
         cnt_seed_count++;					//record the number of seed generations
         double max_seed = 1E13;
@@ -139,51 +198,51 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
 		cnt_poi = cnt_poi + point_add;
 		// We will save this as the end point only if it doesnt go out of the RVE 
 		
-            //---------------------------------------------------------------------------
-            //If the new CNT point grows out of the RVE, the intersecting point at the edge of RVE will be calculated.
-            //The length going out of RVE will be cut and (the outside part will be translated into the RVE for the periodical boundary condition) @Fei How is it translated? I don't see it in the code           
-			if(excub.contain_in(cnt_poi)==0)
-            {
-                Point_2D touch_edge;  //intersection point
-                if(Get_intersecting_point_RVE_edge(excub, new_cnt[0], cnt_poi, touch_edge)==0) {
-                    hout << "Error in Generate_network_threads"<<endl;
-                    return 0;
-                }
-                cnt_poi = touch_edge;
-            }
-            // At this point a nanowire is created with length 'cnt_length' and diameter '2*cnt_rad' and orientation 'cnt_pha'
+        //---------------------------------------------------------------------------
+        //If the new CNT point grows out of the RVE, the intersecting point at the edge of RVE will be calculated.
+        //The length going out of RVE will be cut and (the outside part will be translated into the RVE for the periodical boundary condition) @Fei How is it translated? I don't see it in the code           
+		if(excub.contain_in(cnt_poi)==0)
+        {
+			Point_2D touch_edge;  //intersection point
+			if(Get_intersecting_point_RVE_edge(excub, new_cnt[0], cnt_poi, touch_edge)==0) 
+			{
+				hout << "Error, it fails to find the intersecting point of RVE edge."<<endl;
+				return 0;
+			}
+			cnt_poi = touch_edge;
+		}
+
+		//---------------------------------------------------------------------------
+        // At this point a nanowire is created with length 'cnt_length' and diameter '2*cnt_rad' and orientation 'cnt_pha'
 	    // Calculate the accumulated area and the weight 
-                double temp_length = Effective_length_given_region(gvcub, new_cnt[0],cnt_poi);
-                if (temp_length > 0.0)
-                {
-                    area_sum += temp_length*2*cnt_rad;		//a accumulation on the area (Not the projection area)
-                    wt_sum += temp_length*wei_para;	     	//a accumulation on the weight
-                }
-                		   
-            //---------------------------------------------------------------------------
+        double temp_length = Effective_length_given_region(gvcub, new_cnt[0],cnt_poi);
+        if (temp_length > 0.0)
+        {
+            area_sum += temp_length*2*cnt_rad;		//an accumulation on the area (Not the projection area)
+            wt_sum += temp_length*wei_para;	     	//an accumulation on the weight
+        }
+
+        //---------------------------------------------------------------------------
 	    // Add the point as the end point of the nanowire
 	    new_cnt[1] = cnt_poi;
 		        
         //---------------------------------------------------------------------------
         //Store the CNT points
-		
-            //If the new_cnt array has exactly two points - error if something else happens
-            vector<Point_2D> cnt_temp;
-			cnt_temp.push_back(new_cnt[0]);  // First point of the nanowire
-			cnt_temp.push_back(new_cnt[1]);  // End point of the same nanowire
+		//If the new_cnt array has exactly two points - error if something else happens
+		vector<Point_2D> cnt_temp;
+		cnt_temp.push_back(new_cnt[0]);  // First point of the nanowire
+		cnt_temp.push_back(new_cnt[1]);  // End point of the same nanowire
 		Cnts_points.push_back(cnt_temp);
         Cnts_radius.push_back(cnt_rad);
 		cnt_temp.clear();
-     }	
+	}	
     if(nanowire_geo.criterion == "area") hout << "    The area fraction of generated CNTs is about : " << area_sum/geom_rve.area << endl;
     
-/*     hout << "There were " << point_overlap_count_unique << " overlapping points and ";
-    hout << point_overlap_count << " overlaps, " << endl; */
+//  hout << "There were " << point_overlap_count_unique << " overlapping points and ";
+//  hout << point_overlap_count << " overlaps, " << endl;
     
     return 1;
 }
-
-
 
 //---------------------------------------------------------------------------
 //Generate a random value through a probability distribution function
@@ -233,18 +292,23 @@ int GenNetwork::Get_seed_point_mt(const Rectangle &cub, Point_2D &poin, mt19937 
 //Randomly generate a direction for a given nanowire 
 int GenNetwork::Get_uniform_direction_mt(const struct Nanowire_Geo &nanowire_geo, double &cnt_pha, mt19937 &engine_pha, uniform_real_distribution<double> &dist)const
 {
-    if(nanowire_geo.dir_distrib_type=="random")
+    if(nanowire_geo.dir_distrib_type=="random") //random distribution
     {   
-        //phai is chosen in [-PI/2, PI/2] with uniform distribution
-        cnt_pha = -PI/2 + PI * dist(engine_pha);//*/
-        
+        cnt_pha = nanowire_geo.angle_min + (nanowire_geo.angle_max-nanowire_geo.angle_min) * dist(engine_pha);
+		if(dist(engine_pha)<0.5) cnt_pha = -cnt_pha;
     }
-	// ******************** This might have to be  changed ************
-    else if(nanowire_geo.dir_distrib_type=="specific")
+    else if(nanowire_geo.dir_distrib_type=="normal") //normal distribution
     {
-		cnt_pha = -nanowire_geo.angle_max + 2*nanowire_geo.angle_max *dist(engine_pha);
-    return 1;
-}
+        double sum=0;
+        for(int i=0; i<12; i++)
+        {
+            sum = sum + dist(engine_pha);
+        }
+		cnt_pha = (nanowire_geo.angle_max-nanowire_geo.angle_min)*sum/12.0 + nanowire_geo.angle_min;
+		if(dist(engine_pha)<0.5) cnt_pha = -cnt_pha;
+	}
+
+	return 1;
 }
 
 //---------------------------------------------------------------------------
@@ -281,7 +345,6 @@ double GenNetwork::Effective_length_given_region(const Rectangle &cub, const Poi
         return 0.0; //if both points are outside
 }
 
-//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 //This functions initializes the vectors n_subregions and sectioned_domain
 //
@@ -332,6 +395,7 @@ int GenNetwork::Get_subregion(const struct Geom_RVE &geom_rve, const vector<int>
         return -1;
     }
 }
+
 //---------------------------------------------------------------------------
 //To judge if a point is included in a RVE
 int GenNetwork::Judge_RVE_including_point(const struct Geom_RVE &geom_rve, const Point_2D &point)const
@@ -342,7 +406,8 @@ int GenNetwork::Judge_RVE_including_point(const struct Geom_RVE &geom_rve, const
     
     return 1;
 }
-		
+
+//---------------------------------------------------------------------------
  int GenNetwork::Check_overlapping(const vector<vector<Point_2D> > &cnts_points, Point_2D cnt_poi)const		
 {
 	 for (unsigned int i = 0; i < cnts_points.size(); i++) {
@@ -354,7 +419,9 @@ int GenNetwork::Judge_RVE_including_point(const struct Geom_RVE &geom_rve, const
 		 }
 	 }
 	return 1;
-}	 
+}
+
+ //---------------------------------------------------------------------------
 int GenNetwork::Get_intersecting_point_RVE_edge(const Rectangle &cub, const Point_2D &point1, const Point_2D &point2, Point_2D &touch_point)const
 {
 	// You have 4 edges edge1: left vertical line other edges-- Anti clockwise
@@ -382,6 +449,7 @@ int GenNetwork::Get_intersecting_point_RVE_edge(const Rectangle &cub, const Poin
 	return 0; 
 }	
 
+//---------------------------------------------------------------------------
 int GenNetwork::get_line_intersection(const double &p0_x, const double &p0_y, const double &p1_x, const double &p1_y, const double &p2_x, const double &p2_y, const double &p3_x, const double &p3_y, Point_2D &touchpoint)const
 {
     double s1_x, s1_y, s2_x, s2_y;
@@ -427,3 +495,360 @@ int GenNetwork::Transform_cnts_points(const vector<vector<Point_2D> > &cnts_poin
     
     return 1;
 }
+
+//---------------------------------------------------------------------------
+//Generate the nodes and tetrahedron elements of nanotubes (No const following this function because a sum operation on two Point_3D points inside)
+int GenNetwork::Generate_cnts_nodes_elements(vector<vector<Node> > &nodes, vector<vector<Element> > &eles, const vector<vector<Point_3D> > &cnts_points, const vector<double> &cnts_radius)
+{
+    //Looping the generated nanotubes
+    for(int i=0; i<(int)cnts_points.size(); i++)
+    {
+        vector<Node> nod_temp;
+        vector<Element> ele_temp;
+        
+        const int cps = (int)cnts_points[i].size();
+        for(int j=0; j<cps; j++)
+        {
+            //Calculate the normal vector of the plane
+            Point_3D plane_normal;
+            if(j==0)
+            {
+                plane_normal.x = cnts_points[i][j].x - cnts_points[i][j+1].x;
+                plane_normal.y = cnts_points[i][j].y - cnts_points[i][j+1].y;
+                plane_normal.z = cnts_points[i][j].z - cnts_points[i][j+1].z;
+            }
+            else if(j==cps-1)
+            {
+                plane_normal.x = cnts_points[i][j-1].x - cnts_points[i][j].x;
+                plane_normal.y = cnts_points[i][j-1].y - cnts_points[i][j].y;
+                plane_normal.z = cnts_points[i][j-1].z - cnts_points[i][j].z;
+            }
+            else
+            {
+                const Point_3D vect[3] = { cnts_points[i][j-1], cnts_points[i][j], cnts_points[i][j+1] };
+                const double A = pow(vect[0].x-vect[1].x,2)+pow(vect[0].y-vect[1].y,2)+pow(vect[0].z-vect[1].z,2);
+                const double B = pow(vect[2].x-vect[1].x,2)+pow(vect[2].y-vect[1].y,2)+pow(vect[2].z-vect[1].z,2);
+                const double tt = sqrt(A/B);
+                
+                //Coordinate transformation to find the intersection points
+                double x, y, z;
+                x=vect[1].x+tt*(vect[2].x-vect[1].x);
+                y=vect[1].y+tt*(vect[2].y-vect[1].y);
+                z=vect[1].z+tt*(vect[2].z-vect[1].z);
+                
+                plane_normal.x = vect[0].x - x;
+                plane_normal.y = vect[0].y - y;
+                plane_normal.z = vect[0].z - z;
+            }
+            //The center point of the circle on the plane
+            Point_3D plane_center = cnts_points[i][j];
+            
+            //Define the number of sections along the circumference
+            const int num_sec = 36;
+            if(j==0)
+            {
+                double normal_sita, normal_pha;  //Direction angles
+                //Calculate the angles of the normal verctor of the plane in the spherical coordinate
+                if(Get_angles_vector_in_spherial_coordinates(plane_normal, normal_sita, normal_pha)==0) return 0;
+                
+                //Calculate a group of equidistant points along the circumference which is on the plane defined by the center point of the circle and the normal vector
+                if(Get_points_circle_in_plane(plane_center, normal_sita, normal_pha, cnts_radius[i], num_sec, nod_temp)==0) return 0;
+            }
+            else
+            {
+                //Calculate a group of projected points (which are on the plane with the center point of the circle and the normal vector)
+                //which are projected from a group of points on the previous circumference and projected along the direction of line_vec
+                Point_3D line_vec;
+                line_vec.x = cnts_points[i][j-1].x - cnts_points[i][j].x;
+                line_vec.y = cnts_points[i][j-1].y - cnts_points[i][j].y;
+                line_vec.z = cnts_points[i][j-1].z - cnts_points[i][j].z;
+                if(Get_projected_points_in_plane(plane_center, plane_normal, line_vec, num_sec, nod_temp)==0) return 0;
+            }
+            
+            //Generate a vector of elements
+            if(j!=0)
+            {
+                int nodes_num[6];
+                nodes_num[0] = (j-1)*(num_sec+1);   //The number of the center
+                nodes_num[3] = j*(num_sec+1);
+                for(int k=1; k<=num_sec; k++)
+                {
+                    nodes_num[1] = (j-1)*(num_sec+1) + k;
+                    nodes_num[2] = (j-1)*(num_sec+1) + 1 + k%num_sec;
+                    nodes_num[4] = j*(num_sec+1) + k;
+                    nodes_num[5] = j*(num_sec+1) + 1 + k%num_sec;
+                    
+                    Element eles_num[3];
+                    //----------------------------------------------------------------
+                    //Insert the numbers of nodes to the elements
+                    eles_num[0].nodes_id.push_back(nodes_num[0]);
+                    eles_num[0].nodes_id.push_back(nodes_num[1]);
+                    eles_num[0].nodes_id.push_back(nodes_num[2]);
+                    eles_num[0].nodes_id.push_back(nodes_num[3]);
+                    
+                    eles_num[1].nodes_id.push_back(nodes_num[1]);
+                    eles_num[1].nodes_id.push_back(nodes_num[2]);
+                    eles_num[1].nodes_id.push_back(nodes_num[3]);
+                    eles_num[1].nodes_id.push_back(nodes_num[5]);
+                    
+                    eles_num[2].nodes_id.push_back(nodes_num[1]);
+                    eles_num[2].nodes_id.push_back(nodes_num[3]);
+                    eles_num[2].nodes_id.push_back(nodes_num[4]);
+                    eles_num[2].nodes_id.push_back(nodes_num[5]);
+                    //----------------------------------------------------------------
+                    //Insert the number of elements to element vector
+                    ele_temp.push_back(eles_num[0]);
+                    ele_temp.push_back(eles_num[1]);
+                    ele_temp.push_back(eles_num[2]);
+                }
+            }
+        }
+        
+        nodes.push_back(nod_temp);
+        eles.push_back(ele_temp);
+    }
+    
+    return 1;
+}
+
+//---------------------------------------------------------------------------
+//Generate the nodes and tetrahedron elements of nanotubes (No const following this function because a sum operation on two Point_3D points inside). This function uses a 1D point vector and a 2D structure vector that references the point vector
+int GenNetwork::Generate_cnts_nodes_elements(vector<vector<Node> > &nodes, vector<vector<Element> > &eles, const vector<Point_3D> &cnts_points, const vector<double> &cnts_radius, const vector<vector<long int> > &structure)
+{
+    //Looping the generated nanotubes
+    for(int i=0; i<(int)structure.size(); i++)
+    {
+        vector<Node> nod_temp;
+        vector<Element> ele_temp;
+        
+        const int cps = (int)structure[i].size();
+        for(int j=0; j<cps; j++)
+        {
+            //Calculate the normal vector of the plane
+            Point_3D plane_normal;
+            if(j==0)
+            {
+                long int P1 = structure[i][j];
+                long int P2 = structure[i][j+1];
+                plane_normal.x = cnts_points[P1].x - cnts_points[P2].x;
+                plane_normal.y = cnts_points[P1].y - cnts_points[P2].y;
+                plane_normal.z = cnts_points[P1].z - cnts_points[P2].z;
+            }
+            else if(j==cps-1)
+            {
+                long int P1 = structure[i][j-1];
+                long int P2 = structure[i][j];
+                plane_normal.x = cnts_points[P1].x - cnts_points[P2].x;
+                plane_normal.y = cnts_points[P1].y - cnts_points[P2].y;
+                plane_normal.z = cnts_points[P1].z - cnts_points[P2].z;
+            }
+            else
+            {
+                long int P1 = structure[i][j-1];
+                long int P2 = structure[i][j];
+                long int P3 = structure[i][j+1];
+                const Point_3D vect[3] = { cnts_points[P1], cnts_points[P2], cnts_points[P3] };
+                const double A = pow(vect[0].x-vect[1].x,2)+pow(vect[0].y-vect[1].y,2)+pow(vect[0].z-vect[1].z,2);
+                const double B = pow(vect[2].x-vect[1].x,2)+pow(vect[2].y-vect[1].y,2)+pow(vect[2].z-vect[1].z,2);
+                const double tt = sqrt(A/B);
+                
+                //Coordinate transformation to find the intersection points
+                double x, y, z;
+                x=vect[1].x+tt*(vect[2].x-vect[1].x);
+                y=vect[1].y+tt*(vect[2].y-vect[1].y);
+                z=vect[1].z+tt*(vect[2].z-vect[1].z);
+                
+                plane_normal.x = vect[0].x - x;
+                plane_normal.y = vect[0].y - y;
+                plane_normal.z = vect[0].z - z;
+            }
+            //The center point of the circle on the plane
+            Point_3D plane_center = cnts_points[structure[i][j]];
+            
+            //Define the number of sections along the circumference
+            const int num_sec = 36;
+            if(j==0)
+            {
+                double normal_sita, normal_pha;  //Direction angles
+                //Calculate the angles of the normal verctor of the plane in the spherical coordinate
+                if(Get_angles_vector_in_spherial_coordinates(plane_normal, normal_sita, normal_pha)==0) return 0;
+                
+                //Calculate a group of equidistant points along the circumference which is on the plane defined by the center point of the circle and the normal vector
+                if(Get_points_circle_in_plane(plane_center, normal_sita, normal_pha, cnts_radius[i], num_sec, nod_temp)==0) return 0;
+            }
+            else
+            {
+                //Calculate a group of projected points (which are on the plane with the center point of the circle and the normal vector)
+                //which are projected from a group of points on the previous circumference and projected along the direction of line_vec
+                Point_3D line_vec;
+                long int P1 = structure[i][j-1];
+                long int P2 = structure[i][j];
+                line_vec.x = cnts_points[P1].x - cnts_points[P2].x;
+                line_vec.y = cnts_points[P1].y - cnts_points[P2].y;
+                line_vec.z = cnts_points[P1].z - cnts_points[P2].z;
+                if(Get_projected_points_in_plane(plane_center, plane_normal, line_vec, num_sec, nod_temp)==0) return 0;
+            }
+            
+            //Generate a vector of elements
+            if(j!=0)
+            {
+                int nodes_num[6];
+                nodes_num[0] = (j-1)*(num_sec+1);   //The number of the center
+                nodes_num[3] = j*(num_sec+1);
+                for(int k=1; k<=num_sec; k++)
+                {
+                    nodes_num[1] = (j-1)*(num_sec+1) + k;
+                    nodes_num[2] = (j-1)*(num_sec+1) + 1 + k%num_sec;
+                    nodes_num[4] = j*(num_sec+1) + k;
+                    nodes_num[5] = j*(num_sec+1) + 1 + k%num_sec;
+                    
+                    Element eles_num[3];
+                    //----------------------------------------------------------------
+                    //Insert the numbers of nodes to the elements
+                    eles_num[0].nodes_id.push_back(nodes_num[0]);
+                    eles_num[0].nodes_id.push_back(nodes_num[1]);
+                    eles_num[0].nodes_id.push_back(nodes_num[2]);
+                    eles_num[0].nodes_id.push_back(nodes_num[3]);
+                    
+                    eles_num[1].nodes_id.push_back(nodes_num[1]);
+                    eles_num[1].nodes_id.push_back(nodes_num[2]);
+                    eles_num[1].nodes_id.push_back(nodes_num[3]);
+                    eles_num[1].nodes_id.push_back(nodes_num[5]);
+                    
+                    eles_num[2].nodes_id.push_back(nodes_num[1]);
+                    eles_num[2].nodes_id.push_back(nodes_num[3]);
+                    eles_num[2].nodes_id.push_back(nodes_num[4]);
+                    eles_num[2].nodes_id.push_back(nodes_num[5]);
+                    //----------------------------------------------------------------
+                    //Insert the number of elements to element vector
+                    ele_temp.push_back(eles_num[0]);
+                    ele_temp.push_back(eles_num[1]);
+                    ele_temp.push_back(eles_num[2]);
+                }
+            }
+        }
+        
+        nodes.push_back(nod_temp);
+        eles.push_back(ele_temp);
+    }
+    
+    return 1;
+}
+
+//---------------------------------------------------------------------------
+//Transform angles into matrix
+MathMatrix GenNetwork::Get_transformation_matrix(const double &sita, const double &pha)const
+{
+    //M = M_pha*M_sita
+    //          |cos(pha) -sin(pha) 0|
+    // M_pha  = |sin(pha)  cos(pha) 0|
+    //          |   0         0     1|
+    //
+    //          | cos(sita)  0  sin(sita)|
+    // M_sita = |     0      1      0    |
+    //          |-sin(sita)  0  cos(sita)|
+    //Calculate the matrix elements directly, instead of multiplying two matrices
+    MathMatrix M(3,3);
+    M.element[0][0] = cos(pha)*cos(sita);
+    M.element[0][1] = -sin(pha);
+    M.element[0][2] = cos(pha)*sin(sita);
+    
+    M.element[1][0] = sin(pha)*cos(sita);
+    M.element[1][1] = cos(pha);
+    M.element[1][2] = sin(pha)*sin(sita);
+    
+    M.element[2][0] = -sin(sita);
+    M.element[2][2] = cos(sita);
+    
+    return M;
+}
+
+//---------------------------------------------------------------------------
+//Calculate the angles of a verctor in the spherical coordinate
+int GenNetwork::Get_angles_vector_in_spherial_coordinates(const Point_3D &normal, double &sita, double &pha)const
+{
+    if(normal.x==0&&normal.y==0&&normal.z==0) { hout << "Error, three elements of the vector are all zero!" << endl; return 0; }
+    sita =  acos(normal.z/sqrt(normal.x*normal.x+normal.y*normal.y+normal.z*normal.z));
+    if(normal.x==0&&normal.y==0) pha = 0;
+    else if(normal.y>=0) pha = acos(normal.x/sqrt(normal.x*normal.x+normal.y*normal.y));
+    else if(normal.y<0) pha = 2*PI - acos(normal.x/sqrt(normal.x*normal.x+normal.y*normal.y));
+    
+    return 1;
+}
+
+//---------------------------------------------------------------------------
+//Calculate a group of equidistant points along the circumference which is on the plane defined by the center point of the circle and the normal vector
+int GenNetwork::Get_points_circle_in_plane(const Point_3D &center, const double &trans_sita, const double &trans_pha, const double &radius, const int &num_sec, vector<Node> &nod_temp)const
+{
+    //Insert the center point firstly
+    Node new_node(center.x, center.y, center.z);
+    nod_temp.push_back(new_node);
+    
+    //Define the transformation matrix
+    MathMatrix trans_mat(3,3);
+    trans_mat = Get_transformation_matrix(trans_sita, trans_pha);
+    
+    //1D vector defined by a matrix
+    MathMatrix Rvec(3,1);
+    Rvec.element[0][0] = 0;
+    Rvec.element[1][0] = 0;
+    Rvec.element[2][0] = radius;
+    
+    //1D vector defined by a matrix
+    MathMatrix Res(3,1);
+    
+    double sita, pha;
+    sita = 0.5*PI;	//Defined on the XOY plane
+    for(int i=0; i<num_sec; i++)
+    {
+        pha = i*2*PI/num_sec;
+        MathMatrix matrix_temp = trans_mat*Get_transformation_matrix(sita, pha);
+        Res = matrix_temp*Rvec;
+        
+        new_node.x = center.x + Res.element[0][0];
+        new_node.y = center.y + Res.element[1][0];
+        new_node.z = center.z + Res.element[2][0]; 
+        
+        //Insert the points on the circumference
+        nod_temp.push_back(new_node);
+    }
+    
+    return 1;
+}
+
+//---------------------------------------------------------------------------
+//Calculate a group of projected points (which are on the plane with the center point of the circle and the normal vector) 
+//which are projected from a group of points on the previous circumference and projected along the direction of line_vec
+int GenNetwork::Get_projected_points_in_plane(const Point_3D &center, const Point_3D &normal, const Point_3D &line, const int &num_sec, vector<Node> &nod_temp)const
+{
+    //Record the total number of nodes after the previous generation
+    const int nod_size = (int)nod_temp.size();  
+    
+    //Insert the center point
+    Node new_node(center.x, center.y, center.z);
+    nod_temp.push_back(new_node);
+    
+    const double vectors_dot_product = normal.x*line.x+normal.y*line.y+normal.z*line.z;
+    
+    if(vectors_dot_product==0.0) 
+    {
+        //Corresponding to three points: number 0, 1 and 2, the peak of this angle is at the point number 1. 
+        hout << "Error: these two normal vectors are perpendicular to each other!" << endl;
+        return 0; 
+    }
+    
+    for(int i=num_sec; i>0; i--)
+    {
+        Point_3D point(center.x-nod_temp[nod_size-i].x, center.y-nod_temp[nod_size-i].y, center.z-nod_temp[nod_size-i].z);
+        new_node.x = nod_temp[nod_size-i].x + (normal.x*point.x+normal.y*point.y+normal.z*point.z)*line.x/ vectors_dot_product;
+        new_node.y = nod_temp[nod_size-i].y + (normal.x*point.x+normal.y*point.y+normal.z*point.z)*line.y/ vectors_dot_product;
+        new_node.z = nod_temp[nod_size-i].z + (normal.x*point.x+normal.y*point.y+normal.z*point.z)*line.z/ vectors_dot_product;
+        
+        //Insert the points on the circumference
+        nod_temp.push_back(new_node);
+    }
+    
+    return 1;
+}
+
+//===========================================================================
