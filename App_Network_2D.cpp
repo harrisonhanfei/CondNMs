@@ -15,8 +15,8 @@ int App_Network::Create_conductive_network_2D(Input *Init)const
 	time_t ct0, ct1;
 	
     vector<double> cnts_radius;						//Define the radius of each nanowire in the network
-    vector<Point_2D> cnts_point;					//Define the set of cnt point in a 1D vector
-    vector<vector<int> > cnts_structure;			//The global number of points in the cnts
+    vector<Point_3D> cnts_point;					//Define the set of cnt point in a 1D vector
+    vector<vector<long int> > cnts_structure;			//The global number of points in the cnts
 //  vector<vector<int> > shells_cnt;               //Shell sub-regions to make the triming faster
     
     //-----------------------------------------------------------------------------------------------------------------------------------------

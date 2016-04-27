@@ -20,7 +20,7 @@
 using namespace hns;
 
 #include "Gauss.h"
-#include "Geometry_2D.h"
+#include "Geometry_3D.h"
 
 const double PI = 3.1415926535897932;
 
@@ -43,17 +43,17 @@ struct Simu_para{
 struct Geom_RVE{
 			string keywords;
 			bool mark;
-			Point_2D origin;												//Define an origin point for a RVE
-			double len_x, wid_y;								//Define length, width for an  RVE for generation with an acurrate control 
-			Point_2D ex_origin;											//Define an origin point for an extended RVE to generate network with an acurrate control  
-			double ex_len, ey_wid;							//Define length, width for an extended RVE for generation with an acurrate control  
-			double area;
+			Point_3D origin;								//Define an origin point for a RVE
+			double len_x, wid_y, hei_z;				//Define length, width and height for an  RVE for generation with an acurrate control 
+			Point_3D ex_origin;							//Define an origin point for an extended RVE to generate network with an acurrate control  
+			double ex_len, ey_wid, ez_hei;			//Define length, width for an extended RVE for generation with an acurrate control  
+			double volume, crosec_area;				//Define the volume and the cross-sectional area
 			double density;
 			double gs_minx, gs_miny;					//Define the minimum size for background grids (looking for contact points)
 			double win_max_x, win_max_y;		//Define the size range of the cutoff window and descrement by every step in x, y directions
 			double win_min_x, win_min_y;
 			double win_delt_x, win_delt_y;
-			int cut_num;														//Define the number of cutoff times (0: the maxmum size, n: the maxmum size - n*step_length(delta), n>=1)
+			int cut_num;										//Define the number of cutoff times (0: the maxmum size, n: the maxmum size - n*step_length(delta), n>=1)
 		};
 //The nanowire parameters in a network
 struct Nanowire_Geo{

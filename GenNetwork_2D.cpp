@@ -7,14 +7,12 @@
 //====================================================================================
 
 #include "GenNetwork_2D.h"
-#include "Geometry_2D.h"
-#include "Geometry_3D.h"
 
 //Generate 2D nanowire networks with ovelapping
-int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, const struct Nanowire_Geo &nanowire_geo, vector<Point_2D> &cpoints, vector<double> &cnts_radius, vector<vector<int> > &cstructures)const
+int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, const struct Nanowire_Geo &nanowire_geo, vector<Point_3D> &cpoints, vector<double> &cnts_radius, vector<vector<long int> > &cstructures)const
 {
 	// Define a vector of vectors for storing the cartesian coordinates of nanowires
-    vector<vector<Point_2D> > cnts_points;
+    vector<vector<Point_3D> > cnts_points;
 	//Use the Mersenne Twister for the random number generation
 	if (Generate_network_threads_mt(geom_rve, nanowire_geo, cnts_points, cnts_radius)==0) return 0;
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -22,71 +20,25 @@ int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, cons
     if (Transform_cnts_points(cnts_points, cpoints, cstructures)==0) return 0;	
     //-----------------------------------------------------------------------------------------------------------------------------------------
     //A new class of Tecplot_Export
-    Tecplot_Export *Tecexpt = new Tecplot_Export;
+     Tecplot_Export *Tecexpt = new Tecplot_Export;
      
-	//Generate a rectangle for RVE
-	Rectangle exrect(geom_rve.ex_origin, geom_rve.ex_len, geom_rve.ey_wid);
-     
-     //The geometric structure of CNT network (by threads in Tecplot)
-     if(Tecexpt->Export_network_threads_2D(exrect, cnts_points)==0) return 0;
-     
-	 //Find the max cnt radius
-	 double max_rad = 0;
-	 for(int i=0; i<(int)cnts_radius.size(); i++)
-	 {
-		 if(max_rad<cnts_radius[i]) max_rad = cnts_radius[i];
-	 }
-
-	 //Generate a cuboid for RVE
-	 struct cuboid cub;
-     cub.poi_min.x = geom_rve.ex_origin.x;
-     cub.poi_min.y = geom_rve.ex_origin.y;
-	 cub.poi_min.z = 0.0;
+     struct cuboid cub;														//Generate a cuboid for RVE
+     cub.poi_min = geom_rve.ex_origin;
      cub.len_x = geom_rve.ex_len;
      cub.wid_y = geom_rve.ey_wid;
-	 cub.hei_z = 2*max_rad;
-
-	//Define a vector of vectors for qusi2D output
-    vector<vector<Point_3D> > cnts_3Dpois;
-	 for(int i=0; i<(int)cnts_points.size(); i++)
-	 {
-		vector<Point_3D> vec_3dps;
-		//first point
-		Point_3D temp_poi(cnts_points[i][0].x, cnts_points[i][0].y, max_rad);
-		vec_3dps.push_back(temp_poi);
-
-		//middle points
-		//double x0 = cnts_points[i][0].x;
-		//double deltx = cnts_points[i][1].x - cnts_points[i][0].x;
-		//double y0 = cnts_points[i][0].y;
-		//double delty = cnts_points[i][1].y - cnts_points[i][0].y;
-		//for(int j=1; j<10; j++)
-		//{
-		//	temp_poi.x = x0+deltx*j*0.1;
-		//	temp_poi.y = y0+delty*j*0.1;
-		//	temp_poi.z = max_rad;
-		//	vec_3dps.push_back(temp_poi);
-		//}
-
-		//end point
-		temp_poi.x = cnts_points[i][1].x;
-		temp_poi.y = cnts_points[i][1].y;
-		temp_poi.z = max_rad;
-		vec_3dps.push_back(temp_poi);
-		 
-		//push_back
-		cnts_3Dpois.push_back(vec_3dps);
-	 }
-
-     //The geometric structure of CNT network (by tetrahedron meshes in Tecplot)
-	 //Attention: little parts of nanotube volumes out of the rectangle
-     if(Tecexpt->Export_cnt_network_meshes(cub, cnts_3Dpois, cnts_radius)==0) return 0;
-
+     cub.hei_z = geom_rve.ez_hei;
+     
+     //The geometric structure of CNT network (by threads in Tecplot)
+     if(Tecexpt->Export_network_threads(cub, cnts_points)==0) return 0;
+     
+     //The geometric structure of CNT network (by tetrahedron meshes in Tecplot) //Attention: little parts of nanotube volumes out of the cuboid
+     if(Tecexpt->Export_cnt_network_meshes(cub, cnts_points, cnts_radius)==0) return 0;//*/   
+	
 	return 1;
 }	
 //Generate a network defined by points and connections
 //Use the Mersenne Twister for the random number generation
-int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, const struct Nanowire_Geo &nanowire_geo, vector<vector<Point_2D> > &Cnts_points,  vector<double> &Cnts_radius)const
+int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, const struct Nanowire_Geo &nanowire_geo, vector<vector<Point_3D> > &Cnts_points,  vector<double> &Cnts_radius)const
 {
     //Generate random seed in terms of local time
     //unsigned int time_seed = 1453384844;
@@ -106,8 +58,10 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     std::mt19937 engine_pha(rd());
 	
     //"Filter" MT's output to generate double values, uniformly distributed on the closed interval [0, 1].
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
+	std::uniform_real_distribution<double> dist(0.0, 1.0);
 	
+    //---------------------------------------------------------------------------
+	//************** I suppose the following vectors are used to handle the overlappings *******************
     double area_sum = 0;  //the sum of area of generated CNTs
     double wt_sum = 0;   //the sum of weight of generated CNTs
     int cnt_seed_count = 0; //to record the number of generated seeds of a CNT 
@@ -115,7 +69,6 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     int point_overlap_count_unique = 0; //to record the number of points that were overlapping other points ******May not be necessary, not sure : we will see later
     const int MAX_ATTEMPTS = 5; // Overlapping case fixing
 	
-	// ************** I suppose the following vectors are used to handle the overlappings *******************
 	// Global coordinates global_coordinates[0].at(i) -> global_coordinates[1].at(i) i'th nanowire
     vector<vector<int> > global_coordinates;
     //sectioned_domain[i] contains all the points in sub-region i.
@@ -127,14 +80,21 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     //Initialize the vector sub-regions
     Initialize_subregions(geom_rve, n_subregions, sectioned_domain);
 	
-	
-	
-    //Generate Rectangles that represent the extended domain and the composite domain
+	//---------------------------------------------------------------------------
+    //Generate thin cuboids that represent the extended domain and the network domain
     //To calculate the effective portion (length) which falls into the given region (RVE)
-	//generate a Rectangle to represent the composite domain
-	Rectangle gvcub(geom_rve.origin, geom_rve.len_x, geom_rve.wid_y);
-	//generate a Rectangle to represent the extended domain
-	Rectangle excub(geom_rve.ex_origin, geom_rve.ex_len, geom_rve.ey_wid);
+    struct cuboid gvcub;					//generate a cuboid to represent the composite domain
+    gvcub.poi_min = geom_rve.origin;
+    gvcub.len_x = geom_rve.len_x;
+    gvcub.wid_y = geom_rve.wid_y;
+    gvcub.hei_z = geom_rve.hei_z;
+    gvcub.volume = geom_rve.volume;
+    struct cuboid excub;					//generate a cuboid to represent the extended domain
+    excub.poi_min = geom_rve.ex_origin;
+    excub.len_x = geom_rve.ex_len;
+    excub.wid_y = geom_rve.ey_wid;
+    excub.hei_z = geom_rve.ez_hei;
+    excub.volume = excub.len_x*excub.wid_y*excub.hei_z;
 
 	//--------------- GENERATING SEEDS RANDOMLY AND THEN THE END POINT UNTIL AREA_SUM IS REACHED -----------
     while((nanowire_geo.criterion == "area"&&area_sum < nanowire_geo.real_area)||
@@ -142,7 +102,7 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     {
         //---------------------------------------------------------------------------
         //Define two points for a new nanowire
-        Point_2D new_cnt[2];
+        Point_3D new_cnt[2];
         
         //---------------------------------------------------------------------------
         //Randomly generate a length of a CNT
@@ -165,26 +125,11 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
 		
         //---------------------------------------------------------------------------
         //Randomly generate a seed (initial point) of a CNT in the extended RVE	
-        
-        Point_2D cnt_poi;
+        Point_3D cnt_poi;
         if(Get_seed_point_mt(excub, cnt_poi, engine_x, engine_y, dist)==0) return 0;
-		
-		//int counter=1;
-  //      //Check overlapping of the initial point 	
-		//while(!Check_overlapping(Cnts_points, cnt_poi)) {
-		//	if(Get_seed_point_mt(excub, cnt_poi, engine_x, engine_y, dist)==0) return 0;
-  //          cnt_seed_count++;					//record the number of seed generations
-  //          //hout << "Seed deleted" << endl;
-  //          if (counter == MAX_ATTEMPTS) {
-  //              hout << "Too many attempts to resolve overlapping of an intial CNT point (" << counter << " attempts). ";
-  //              hout << cnt_poi.x << ' ' << cnt_poi.y << endl;
-  //              return 0;
-  //          }
-  //          counter ++;
-		//} 
-		
-        new_cnt[0] = cnt_poi;	//store this seed point in the array for a new nanowire
-        //---------------------------------------------------------------------------
+		new_cnt[0] = cnt_poi;	//store this seed point in the array for a new nanowire
+        
+		//---------------------------------------------------------------------------
         cnt_seed_count++;					//record the number of seed generations
         double max_seed = 1E13;
         if(cnt_seed_count>max_seed)
@@ -192,30 +137,37 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
             hout << "The number of seed genrations is lager than "<<max_seed<<", but the nanowire generation still fails to acheive the demanded area fraction." << endl;
             return 0;
         }
-		
-		// We have generated a new seed (Initial point of the nanowire) and the orientation of the nanowire so, the end point of nanowire is
-		Point_2D point_add(cnt_length*cos(cnt_pha),cnt_length*sin(cnt_pha));
-		cnt_poi = cnt_poi + point_add;
-		// We will save this as the end point only if it doesnt go out of the RVE 
-		
-        //---------------------------------------------------------------------------
-        //If the new CNT point grows out of the RVE, the intersecting point at the edge of RVE will be calculated.
-        //The length going out of RVE will be cut and (the outside part will be translated into the RVE for the periodical boundary condition) @Fei How is it translated? I don't see it in the code           
-		if(excub.contain_in(cnt_poi)==0)
-        {
-			Point_2D touch_edge;  //intersection point
-			if(Get_intersecting_point_RVE_edge(excub, new_cnt[0], cnt_poi, touch_edge)==0) 
-			{
-				hout << "Error, it fails to find the intersecting point of RVE edge."<<endl;
-				return 0;
-			}
-			cnt_poi = touch_edge;
-		}
 
 		//---------------------------------------------------------------------------
-        // At this point a nanowire is created with length 'cnt_length' and diameter '2*cnt_rad' and orientation 'cnt_pha'
-	    // Calculate the accumulated area and the weight 
-        double temp_length = Effective_length_given_region(gvcub, new_cnt[0],cnt_poi);
+		//The end point of nanowire (the corresponding initial-point is new_cnt[0])
+		cnt_poi.x += cnt_length*cos(cnt_pha);
+		cnt_poi.y += cnt_length*sin(cnt_pha);
+		
+        //---------------------------------------------------------------------------
+        //If the new CNT point grows out of the RVE, the intersecting point at the surfaces of RVE will be calculated.
+        //The new segment will be cut
+        if(Judge_RVE_including_point(excub, cnt_poi)==0)
+        {
+            //Calculate all intersection points between the new segment and surfaces of RVE
+            //(using a parametric equatio:  the parameter 0<t<1, and sort all intersection points from the smaller t to the greater t)
+            vector<Point_3D> ipoi_vec;  //a vector for intersection points
+            if(Get_intersecting_point_RVE_surface(excub, new_cnt[0], cnt_poi, ipoi_vec)==0) 
+			{
+                hout << "Error in Generate_network_threads"<<endl;
+                return 0;
+            }
+            cnt_poi = ipoi_vec[0];
+        }
+
+		//---------------------------------------------------------------------------
+        //At this point a nanowire is created with length 'cnt_length' and diameter '2*cnt_rad' and orientation 'cnt_pha'
+	    //Calculate the accumulated area and the weight
+		double temp_length;
+        if(Effective_length_given_region(gvcub, new_cnt[0], cnt_poi, temp_length)==0)
+		{
+			hout << "Error in Effective_length_given_region!"<<endl;
+			return 0;
+		}
         if (temp_length > 0.0)
         {
             area_sum += temp_length*2*cnt_rad;		//an accumulation on the area (Not the projection area)
@@ -223,20 +175,20 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
         }
 
         //---------------------------------------------------------------------------
-	    // Add the point as the end point of the nanowire
+	    //Add the point as the end point of the nanowire
 	    new_cnt[1] = cnt_poi;
 		        
         //---------------------------------------------------------------------------
         //Store the CNT points
 		//If the new_cnt array has exactly two points - error if something else happens
-		vector<Point_2D> cnt_temp;
+		vector<Point_3D> cnt_temp;
 		cnt_temp.push_back(new_cnt[0]);  // First point of the nanowire
 		cnt_temp.push_back(new_cnt[1]);  // End point of the same nanowire
 		Cnts_points.push_back(cnt_temp);
         Cnts_radius.push_back(cnt_rad);
 		cnt_temp.clear();
 	}	
-    if(nanowire_geo.criterion == "area") hout << "    The area fraction of generated CNTs is about : " << area_sum/geom_rve.area << endl;
+    if(nanowire_geo.criterion == "area") hout << "    The area fraction of generated CNTs is about : " << area_sum/geom_rve.crosec_area << endl;
     
 //  hout << "There were " << point_overlap_count_unique << " overlapping points and ";
 //  hout << point_overlap_count << " overlaps, " << endl;
@@ -278,12 +230,16 @@ int GenNetwork::Get_random_value_mt(const string &dist_type, mt19937 &engine, un
 
 //---------------------------------------------------------------------------
 //Randomly generate a seed (intial point) of a CNT in the RVE
-int GenNetwork::Get_seed_point_mt(const Rectangle &cub, Point_2D &poin, mt19937 &engine_x, mt19937 &engine_y, uniform_real_distribution<double> &dist)const
+int GenNetwork::Get_seed_point_mt(const struct cuboid &cub, Point_3D &point, mt19937 &engine_x, mt19937 &engine_y, uniform_real_distribution<double> &dist)const
 {
     
-    poin.x = cub.point[0].x + cub.length*dist(engine_x);
+    point.x = cub.poi_min.x + cub.len_x*dist(engine_x);
     
-    poin.y = cub.point[0].y+ cub.width*dist(engine_y);
+    point.y = cub.poi_min.y + cub.wid_y*dist(engine_y);
+    
+    point.z = cub.poi_min.z + 0.5*cub.hei_z;
+    
+    point.flag = 0; //0 denotes this point is the initial point of a CNT
     
     return 1;
 }
@@ -310,41 +266,116 @@ int GenNetwork::Get_uniform_direction_mt(const struct Nanowire_Geo &nanowire_geo
 
 	return 1;
 }
-
 //---------------------------------------------------------------------------
-double GenNetwork::Effective_length_given_region(const Rectangle &cub, const Point_2D &last_point, const Point_2D &new_point)const
+//To calculate the effective portion (length) which falls into the given region (RVE)
+int GenNetwork::Effective_length_given_region(const struct cuboid &cub, const Point_3D &last_point, const Point_3D &new_point, double &real_length)const
 {
     //Check if the last point is inside the given region
-    int last_bool = cub.contain_in(last_point);
+    int last_bool = Judge_RVE_including_point(cub, last_point);
     //Check if the new point is inside the given region
-    int new_bool = cub.contain_in(new_point);
+    int new_bool = Judge_RVE_including_point(cub, new_point);
     
-    //To store the intersecting point
-    Point_2D touchpoint;
+    //Vector to store the intersecting point
+    vector<Point_3D> ipoi_vec;
     
-    //Decide the corresponding case and calculate area fraction
-    if (last_bool&&new_bool)
-        return last_point.distance_to(new_point); //both points are inside so add the total length
-    else if (last_bool&&(!new_bool))  //if the last point is inside and the new point is outside
+    //Decide the corresponding case and calculate volume fraction
+    if (last_bool&&new_bool)	real_length = last_point.distance_to(new_point);	//both points are inside so add the total length
+    else if (last_bool&&(!new_bool))																		//if the last point is inside and the new point is outside
     {
-        if(Get_intersecting_point_RVE_edge(cub, last_point, new_point, touchpoint)==0){
+        if(Get_intersecting_point_RVE_surface(cub, last_point, new_point, ipoi_vec)==0)
+		{
             hout << "Error in Effective_length_given_region, case last_bool&&(!new_bool) "<<endl;
             return 0;
         }
-        return last_point.distance_to(touchpoint);
+        real_length = last_point.distance_to(ipoi_vec[0]);
     }
-    else if ((!last_bool)&&new_bool)  //if the last point is outside and the new point is inside
+    else if ((!last_bool)&&new_bool)																		//if the last point is outside and the new point is inside
     {
-        if(Get_intersecting_point_RVE_edge(cub, new_point, last_point, touchpoint)==0) {
+        if(Get_intersecting_point_RVE_surface(cub, new_point, last_point, ipoi_vec)==0)
+		{
             hout << "Error in Effective_length_given_region, case (!last_bool)&&new_bool"<<endl;
             return 0;
         }
-        return new_point.distance_to(touchpoint);
+       real_length = new_point.distance_to(ipoi_vec[0]);
     }
-    else
-        return 0.0; //if both points are outside
-}
+    else real_length = 0.0;																						//if both points are outside
 
+	return 1;
+}
+//---------------------------------------------------------------------------
+//Calculate all intersection points between the new segment and surfaces of RVE
+//(using a parametric equatio:  the parameter 0<t<1, and sort all intersection points from the smaller t to the greater t)
+int GenNetwork::Get_intersecting_point_RVE_surface(const struct cuboid &cub, const Point_3D &point0, const Point_3D &point1, vector<Point_3D> &ipoi_vec)const
+{
+    double t_temp[6];
+    //The planes (surfaces of RVE) perpendicular to X axis
+    t_temp[0] = (cub.poi_min.x - point0.x)/(point1.x - point0.x);
+    t_temp[1] = (cub.poi_min.x + cub.len_x - point0.x)/(point1.x - point0.x);
+    //The planes (surfaces of RVE) perpendicular to Y axis
+    t_temp[2] = (cub.poi_min.y - point0.y)/(point1.y - point0.y);
+    t_temp[3] = (cub.poi_min.y + cub.wid_y - point0.y)/(point1.y - point0.y);
+    //The planes (surfaces of RVE) perpendicular to Z axis
+    t_temp[4] = (cub.poi_min.z - point0.z)/(point1.z - point0.z);
+    t_temp[5] = (cub.poi_min.z + cub.hei_z - point0.z)/(point1.z - point0.z);
+    
+    vector<double> t_ratio;
+    for(int i=0; i<6; i++)
+    {
+        if(t_temp[i]>=0&&t_temp[i]<1)
+        {
+            //Binary insertion sort
+            int left = 0;
+            int right = (int)t_ratio.size()-1;
+            while(right>=left)
+            {
+                int middle = (left + right)/2;
+                if(fabs(t_ratio[middle] - t_temp[i])<Zero) goto T_Value_Same; //the case with same values
+                else if(t_ratio[middle] > t_temp[i]) right = middle - 1;
+                else left = middle + 1;
+            }
+            t_ratio.insert(t_ratio.begin()+left, t_temp[i]);	//insertion
+        T_Value_Same: ;
+        }
+    }
+    
+    if((int)t_ratio.size()<1||(int)t_ratio.size()>3)
+    {
+        hout << "Error, the number of intersection points between the segement and the surfaces of RVE is " << (int)t_ratio.size() << ", less than one or more than three!" << endl;
+        hout << "Cuboid P_min="<<cub.poi_min.x<<' '<<cub.poi_min.y<<' '<<cub.poi_min.z<<endl;
+        hout << "Cuboid size="<<cub.len_x<<' '<<cub.wid_y<<' '<<cub.hei_z<<endl;
+        hout << "P0= "<<point0.x<<' '<<point0.y<<' '<<point0.z<<' '<<endl;
+        hout << "Judge_RVE_including_point="<<Judge_RVE_including_point(cub, point0)<<endl;
+        hout << "P1= "<<point1.x<<' '<<point1.y<<' '<<point1.z<<' '<<endl;
+        hout << "Judge_RVE_including_point="<<Judge_RVE_including_point(cub, point1)<<endl;
+        return 0;
+    }
+    
+    Point_3D point_temp;
+    for(int i=0; i<(int)t_ratio.size(); i++)
+    {
+        point_temp.x = point0.x+(point1.x-point0.x)*t_ratio[i];
+        point_temp.y = point0.y+(point1.y-point0.y)*t_ratio[i];
+        point_temp.z = point0.z+(point1.z-point0.z)*t_ratio[i];
+        point_temp.flag = 1;		//a temporary point
+        
+        //---------------------------------------------------------------------------
+        //Error correction
+        if(fabs(point_temp.x-cub.poi_min.x)<Zero) point_temp.x = cub.poi_min.x;
+        else if(fabs(point_temp.x-cub.poi_min.x-cub.len_x)<Zero) point_temp.x = cub.poi_min.x + cub.len_x;
+        
+        if(fabs(point_temp.y-cub.poi_min.y)<Zero) point_temp.y = cub.poi_min.y;
+        else if(fabs(point_temp.y-cub.poi_min.y-cub.wid_y)<Zero) point_temp.y = cub.poi_min.y + cub.wid_y;
+        
+        if(fabs(point_temp.z-cub.poi_min.z)<Zero) point_temp.z = cub.poi_min.z;
+        else if(fabs(point_temp.z-cub.poi_min.z-cub.hei_z)<Zero) point_temp.z = cub.poi_min.z + cub.hei_z;
+        
+        //---------------------------------------------------------------------------
+        //Insert a new point
+        ipoi_vec.push_back(point_temp);
+    }
+    
+    return 1;
+}
 //---------------------------------------------------------------------------
 //This functions initializes the vectors n_subregions and sectioned_domain
 //
@@ -374,114 +405,36 @@ void GenNetwork::Initialize_subregions(const struct Geom_RVE &geom_rve, vector<i
     vector<long int> empty;
     sectioned_domain.assign(nsubregions[0]*nsubregions[1], empty);
 }
-
 //---------------------------------------------------------------------------
-//This function returns the subregion a point belongs to
-int GenNetwork::Get_subregion(const struct Geom_RVE &geom_rve, const vector<int> &n_subregions, const Point_2D &point)const
+//To judge if a point is included in a cuboid
+int GenNetwork::Judge_RVE_including_point(const struct cuboid &cub, const Point_3D &point)const
 {
-    if (Judge_RVE_including_point(geom_rve, point)) {
-        //These variables will give me the region cordinates of the region that a point belongs to
-        int a, b;
-        //Calculate the region-coordinates
-        a = (int)((point.x-geom_rve.origin.x)/geom_rve.gs_minx);
-        //Limit the value of a as it has to go from 0 to n_subregions[0]-1
-        if (a == n_subregions[0]) a--;
-        b = (int)((point.y-geom_rve.origin.y)/geom_rve.gs_miny);
-        //Limit the value of b as it has to go from 0 to n_subregions[1]-1
-        if (b == n_subregions[1]) b--;
-        return (a + (b*n_subregions[0]) );
-    } else {
-        //If the point is in the boundary layer, then there is no need to calculate sub-region
-        return -1;
-    }
-}
-
-//---------------------------------------------------------------------------
-//To judge if a point is included in a RVE
-int GenNetwork::Judge_RVE_including_point(const struct Geom_RVE &geom_rve, const Point_2D &point)const
-{
-    if(point.x<geom_rve.origin.x||point.x>geom_rve.origin.x+geom_rve.len_x||
-       point.y<geom_rve.origin.y||point.y>geom_rve.origin.y+geom_rve.wid_y) 
-	   return 0;
+    if(point.x<cub.poi_min.x||point.x>cub.poi_min.x+cub.len_x||
+       point.y<cub.poi_min.y||point.y>cub.poi_min.y+cub.wid_y||
+       point.z<cub.poi_min.z||point.z>cub.poi_min.z+cub.hei_z) return 0;
     
     return 1;
 }
-
 //---------------------------------------------------------------------------
- int GenNetwork::Check_overlapping(const vector<vector<Point_2D> > &cnts_points, Point_2D cnt_poi)const		
+//To judge if a point is included in a RVE
+int GenNetwork::Judge_RVE_including_point(const struct Geom_RVE &geom_rve, const Point_3D &point)const
 {
-	 for (unsigned int i = 0; i < cnts_points.size(); i++) {
-		 for (int j = 0; j < (int)cnts_points[i].size(); j++) {
-			 if (cnt_poi == cnts_points[i][j] ) {
-				 // New generated seed overlaps with one of the nanowires end points already generated
-				 return -1;
-			 }
-		 }
-	 }
-	return 1;
+    if(point.x<geom_rve.origin.x||point.x>geom_rve.origin.x+geom_rve.len_x||
+       point.y<geom_rve.origin.y||point.y>geom_rve.origin.y+geom_rve.wid_y||
+       point.z<geom_rve.origin.z||point.z>geom_rve.origin.z+geom_rve.hei_z) return 0;
+    
+    return 1;
 }
-
- //---------------------------------------------------------------------------
-int GenNetwork::Get_intersecting_point_RVE_edge(const Rectangle &cub, const Point_2D &point1, const Point_2D &point2, Point_2D &touch_point)const
-{
-	// You have 4 edges edge1: left vertical line other edges-- Anti clockwise
-	// Starting from edge 1, we will check for intersection one by one
-	// for example, Checking for intersection with edge 2 defined by (Rectangle.point[0],Rectangle.point[3])
-	// AB is a line formed by p0p1; CD is a line formed by p2p3; we are finding the intersection of segments AB and CD
-	double p0_x, p0_y, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y;
-	
-	p0_x = point1.x;   p0_y = point1.y;  // A
-	p1_x = point2.x;   p1_y = point2.y;  // B
-	
-		int i1, i2; // Two points of an edge
-	for (int j=0; j<4; j++)	{
-		if (j==0) {i1=1; i2=0;}  // Left edge
-		else if (j==1) {i1=0; i2=3;}  // Bottom edge
-		else if (j==2) {i1=3; i2=2;}  // right edge
-		else if (j==3) {i1=2; i2=1;}  // Top edge 
-		p2_x = cub.point[i1].x; 	p2_y = cub.point[i1].y;  // C
-		p3_x = cub.point[i2].x; 	p3_y = cub.point[i2].y;  // D
-		if (get_line_intersection(p0_x, p0_y, p1_x, p1_y, p2_x, p2_y, p3_x, p3_y, touch_point) ==1) {
-		// Intersection found, now stop the loop 
-		return 1;
-		}
-		}
-	return 0; 
-}	
-
-//---------------------------------------------------------------------------
-int GenNetwork::get_line_intersection(const double &p0_x, const double &p0_y, const double &p1_x, const double &p1_y, const double &p2_x, const double &p2_y, const double &p3_x, const double &p3_y, Point_2D &touchpoint)const
-{
-    double s1_x, s1_y, s2_x, s2_y;
-    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
-    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
-
-    double s, t;
-    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
-    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
-
-    if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-    {
-        // Collision detected
-        if (touchpoint.x != NULL)
-            touchpoint.x = p0_x + (t * s1_x);
-        if (touchpoint.y != NULL)
-            touchpoint.y = p0_y + (t * s1_y);
-        return 1;
-    }
-    return 0; // No collision
-}
-
 //---------------------------------------------------------------------------
 //Transform the 2D cnts_points into 1D cpoints and 2D cstructuers
-int GenNetwork::Transform_cnts_points(const vector<vector<Point_2D> > &cnts_points, vector<Point_2D> &cpoints, vector<vector<int> > &cstructures)const
+int GenNetwork::Transform_cnts_points(const vector<vector<Point_3D> > &cnts_points, vector<Point_3D> &cpoints, vector<vector<long int> > &cstructures)const
 {
     hout << "There are "<<cnts_points.size()<<" CNTs."<<endl;
     long int count = 0;
     for(int i=0; i<(int)cnts_points.size(); i++)
     {
-        vector<int> struct_temp;
-        for(int j=0; j<(int)cnts_points[i].size(); j++) // right now we are only considering the end points of the nanowires, later we will split the NWs
+        vector<long int> struct_temp;
+        for(int j=0; j<(int)cnts_points[i].size(); j++)
         {
             cpoints.push_back(cnts_points[i][j]);
             cpoints.back().flag = i;
@@ -495,7 +448,6 @@ int GenNetwork::Transform_cnts_points(const vector<vector<Point_2D> > &cnts_poin
     
     return 1;
 }
-
 //---------------------------------------------------------------------------
 //Generate the nodes and tetrahedron elements of nanotubes (No const following this function because a sum operation on two Point_3D points inside)
 int GenNetwork::Generate_cnts_nodes_elements(vector<vector<Node> > &nodes, vector<vector<Element> > &eles, const vector<vector<Point_3D> > &cnts_points, const vector<double> &cnts_radius)

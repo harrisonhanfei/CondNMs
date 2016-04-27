@@ -2,8 +2,8 @@
 //SOFTWARE:	Network of Eelectrically Conductive Nanocomposites (NECN)
 //CODE FILE:	Input_Reader.cpp
 //OBJECTIVE:	Reading the input data
-//AUTHOR:		Fei Han; Angel Mora
-//E-MAIL:			fei.han@kaust.edu.sa;  angel.mora@kaust.edu.sa
+//AUTHOR:		Fei Han; Angel Mora; Thirupathi Maloth
+//E-MAIL:			fei.han@kaust.edu.sa;  angel.mora@kaust.edu.sa; thirupathi.maloth@kaust.edu.sa
 //====================================================================================
 
 #include "Input_Reader.h"
@@ -36,16 +36,20 @@ int Input::Read_Infile(ifstream &infile)
 			return 0; 
 		}
 
-		//the real area of cnts in the RVE
+		//the real area of nanowires in the RVE
 		if(geom_rve.mark&&nanowire_geo.mark)
 		{
 			//Calculate the real area of nanowires
-			nanowire_geo.real_area = nanowire_geo.area_fraction * geom_rve.area;
+			nanowire_geo.real_area = nanowire_geo.area_fraction * geom_rve.crosec_area;
 			//Define the extented RVE with one length of nanowire
 			geom_rve.ex_origin.x = geom_rve.origin.x - nanowire_geo.len_max;
 			geom_rve.ex_origin.y = geom_rve.origin.y - nanowire_geo.len_max;
 			geom_rve.ex_len = geom_rve.len_x + 2*nanowire_geo.len_max;
 			geom_rve.ey_wid = geom_rve.wid_y+ 2*nanowire_geo.len_max;
+			//Define the quasi-2D RVE boxes
+			geom_rve.ex_origin.z = geom_rve.origin.z = 0.0;
+			geom_rve.ez_hei = geom_rve.hei_z = 2*nanowire_geo.rad_max;
+			geom_rve.volume = geom_rve.hei_z * geom_rve.crosec_area;
 		}
 	}
 
@@ -89,7 +93,7 @@ int Input::Data_Initialization()
 	geom_rve.ex_origin.flag = 0;
 	geom_rve.ex_len = 1.0;
 	geom_rve.ey_wid = 1.0;
-	geom_rve.area = geom_rve.len_x*geom_rve.wid_y;
+	geom_rve.crosec_area = geom_rve.len_x*geom_rve.wid_y;
 	geom_rve.density = 1.0;
 	geom_rve.gs_minx = 1.0;
 	geom_rve.gs_miny = 1.0;
@@ -191,7 +195,7 @@ int Input::Read_rve_geometry(struct Geom_RVE &geom_rve, ifstream &infile)
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//Define the domain of RVE: the lower-left corner point of RVE and the length, width and height of RVE
 	istringstream istr0(Get_Line(infile));
-	istr0 >> geom_rve.origin.x >> geom_rve.origin.y;
+	istr0 >> geom_rve.origin.x >> geom_rve.origin.y ;
 	istr0 >> geom_rve.len_x >> geom_rve.wid_y; 
 	if(geom_rve.len_x<=0||geom_rve.wid_y<=0) 
 	{
@@ -199,7 +203,7 @@ int Input::Read_rve_geometry(struct Geom_RVE &geom_rve, ifstream &infile)
 		hout << "Error: the sizes of RVE should be positive!" << endl;
 		return 0;
 	}
-	geom_rve.area = geom_rve.len_x*geom_rve.wid_y; 
+	geom_rve.crosec_area = geom_rve.len_x*geom_rve.wid_y; 
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------
 	//Define the size range of the observation window and descrement by every step in x, y and z directions
@@ -321,7 +325,7 @@ int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstr
 		if(nanowire_geo.accum_mode<0&&nanowire_geo.accum_mode>2){ hout <<"Error: the mode of accumulation should be between 0 and 2." << endl; return 0; }
         
 		//The total volume of the nanowire network
-		nanowire_geo.real_area = nanowire_geo.area_fraction*geom_rve.area;
+		nanowire_geo.real_area = nanowire_geo.area_fraction*geom_rve.crosec_area;
 	}
 	else if(nanowire_geo.criterion=="wt")
 	{
@@ -340,7 +344,7 @@ int Input::Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstr
 		if(nanowire_geo.linear_density>=nanowire_geo.matrix_density){ hout << "Error: the density of matrix or the linear density of a nanowire is wrong." << endl; return 0; }
         
 		//The real weight of nanowires
-		nanowire_geo.real_weight = nanowire_geo.weight_fraction*geom_rve.area*geom_rve.density;
+		nanowire_geo.real_weight = nanowire_geo.weight_fraction*geom_rve.crosec_area*geom_rve.density;
 	}
 	else { hout << "Error: the criterian of generation is neither 'area' nor 'wt'." << endl; return 0; }
 
