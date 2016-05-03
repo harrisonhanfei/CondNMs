@@ -33,7 +33,7 @@ class Tecplot_Export
 		//Export a 3D cuboid
 		int Export_cuboid(ofstream &otec, const struct cuboid &cub)const;
 		//Export 3D nanotube threads
-		int Export_nano_threads(ofstream &otec, const vector<vector<Point_3D> > &cnts_points)const;
+		int Export_nano_threads(ofstream &otec, const struct cuboid &cell, const vector<vector<Point_3D> > &cnts_points)const;
 		//Export nanotube network by tetrahedron elements (Multiple zones in tecplot: each nanotube by one zone)
 		int Export_cnts_meshes_multizones(const struct cuboid &cub, const vector<vector<Node> > &nodes, const vector<vector<Element> > &eles)const;
 		//Export nanotube network by tetrahedron elements (Single zones in tecplot: all nanotubes by one zone)

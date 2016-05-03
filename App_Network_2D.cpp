@@ -28,9 +28,7 @@ int App_Network::Create_conductive_network_2D(Input *Init)const
     delete Genet;
     ct1 = time(NULL);
     hout << "Nanowire network generation time: " << (int)(ct1-ct0) <<" secs." << endl;
-    //Printer *P = new Printer;
-    //P->Print_1d_vec(cnts_point, "cnts_point_00.txt");
- /* 
+/*  
     //-----------------------------------------------------------------------------------------------------------------------------------------
 	ct0 = time(NULL);
     Background_vectors *Bckg = new Background_vectors;
@@ -39,7 +37,7 @@ int App_Network::Create_conductive_network_2D(Input *Init)const
     if (Bckg->Generate_shells_and_structure(Init->geom_rve, Init->nanowire_geo, cnts_point, shells_cnt)==0) return 0;
 	ct1 = time(NULL);
 	hout << "Generate shells and structure time: "<<(int)(ct1-ct0)<<" secs."<<endl;
-    
+
 	for(int i=0; i<=Init->geom_rve.cut_num; i++)
 	{
         hout << "======================================================"<<endl;

@@ -22,7 +22,7 @@ int Tecplot_Export::Export_network_threads(const struct cuboid &cub, const vecto
 	
 	//---------------------------------------------------------------------------
 	//Export 3D nanotube threads
-	if(Export_nano_threads(otec, cnts_points)==0) return 0;
+	if(Export_nano_threads(otec, cub, cnts_points)==0) return 0;
 
 	//---------------------------------------------------------------------------
 	otec.close();
@@ -47,26 +47,26 @@ int Tecplot_Export::Export_cuboid(ofstream &otec, const struct cuboid &cell)cons
 	otec << "1 2 4 3 5 6 8 7" << endl;
 	otec << endl << endl;
 
-	otec << "ZONE N=" << 8 << ", E=" << 1 << ", F=FEPOINT, ET=BRICK" << endl;
-	double cell_x[2] = {cell.poi_min.x, cell.poi_min.x+cell.len_x};
-	double cell_y[2] = {cell.poi_min.y, cell.poi_min.y+cell.wid_y};
-	double cell_z[2] = {cell.poi_min.z, cell.poi_min.z+cell.hei_z};
-	for(int i=0; i<2; i++)
-		for(int j=0; j<2; j++)
-			for(int k=0; k<2; k++)
-			{
-				otec << cell_x[i] << "  " << cell_y[j] << "  " << cell_z[k] << endl;
-			}
-	
-	otec << "1 2 4 3 5 6 8 7" << endl;
-	otec << endl << endl;
-
 	return 1;
 }
 //---------------------------------------------------------------------------
 //Export 3D nanotube threads
-int Tecplot_Export::Export_nano_threads(ofstream &otec, const vector<vector<Point_3D> > &cnts_points)const
+int Tecplot_Export::Export_nano_threads(ofstream &otec, const struct cuboid &cell, const vector<vector<Point_3D> > &cnts_points)const
 {
+	//---------------------------------------------------------------------------
+	//Export threads
+	double cell_x[2] = {cell.poi_min.x, cell.poi_min.x+cell.len_x};
+	double cell_y[2] = {cell.poi_min.y, cell.poi_min.y+cell.wid_y};
+	double cell_z[2] = {cell.poi_min.z, cell.poi_min.z+cell.hei_z};
+	otec << "ZONE N=" << 4 << ", E=" << 1 << ", F=FEPOINT, ET=QUADRILATERAL" << endl;
+	for(int i=0; i<2; i++)
+		for(int j=0; j<2; j++)
+			otec << cell_x[i] << "  " << cell_y[j] << "  " << 0.5*(cell_z[0]+cell_z[1]) << endl;
+	otec << "1 2 4 3" << endl;
+	otec << endl << endl;
+
+	//---------------------------------------------------------------------------
+	//Export threads
 	for(int i=0; i<(int)cnts_points.size(); i++)
 	{
 		otec << "ZONE T=\"Line\"" << endl;
@@ -113,9 +113,26 @@ int Tecplot_Export::Export_cnts_meshes_multizones(const struct cuboid &cub, cons
 	otec << "TITLE = CNT_Meshes_Multizones" << endl;
 	otec << "VARIABLES = X, Y, Z" << endl;	
 	
-	//---------------------------------------------------------------------------
 	//Export a 3D cylinder
+	//---------------------------------------------------------------------------
+	//Export a 3D cuboid for display in tecplot
 	if(Export_cuboid(otec, cub)==0) return 0;
+
+	//---------------------------------------------------------------------------
+	//Export a 3D thin cuboid
+	otec << "ZONE N=" << 8 << ", E=" << 1 << ", F=FEPOINT, ET=BRICK" << endl;
+	double cell_x[2] = {cub.poi_min.x, cub.poi_min.x+cub.len_x};
+	double cell_y[2] = {cub.poi_min.y, cub.poi_min.y+cub.wid_y};
+	double cell_z[2] = {cub.poi_min.z, cub.poi_min.z+cub.hei_z};
+	for(int i=0; i<2; i++)
+		for(int j=0; j<2; j++)
+			for(int k=0; k<2; k++)
+			{
+				otec << cell_x[i] << "  " << cell_y[j] << "  " << cell_z[k] << endl;
+			}
+	
+	otec << "1 2 4 3 5 6 8 7" << endl;
+	otec << endl << endl;
 
 	//---------------------------------------------------------------------------
 	//Export the meshes of nanotubes
@@ -151,9 +168,26 @@ int Tecplot_Export::Export_cnts_meshes_singlezone(const struct cuboid &cub, cons
 	otec << "TITLE = CNT_Meshes_Singlezone" << endl;
 	otec << "VARIABLES = X, Y, Z" << endl;	
 	
-	//---------------------------------------------------------------------------
 	//Export a 3D cylinder
+	//---------------------------------------------------------------------------
+	//Export a 3D cuboid for display in tecplot
 	if(Export_cuboid(otec, cub)==0) return 0;
+
+	//---------------------------------------------------------------------------
+	//Export a 3D thin cuboid
+	otec << "ZONE N=" << 8 << ", E=" << 1 << ", F=FEPOINT, ET=BRICK" << endl;
+	double cell_x[2] = {cub.poi_min.x, cub.poi_min.x+cub.len_x};
+	double cell_y[2] = {cub.poi_min.y, cub.poi_min.y+cub.wid_y};
+	double cell_z[2] = {cub.poi_min.z, cub.poi_min.z+cub.hei_z};
+	for(int i=0; i<2; i++)
+		for(int j=0; j<2; j++)
+			for(int k=0; k<2; k++)
+			{
+				otec << cell_x[i] << "  " << cell_y[j] << "  " << cell_z[k] << endl;
+			}
+	
+	otec << "1 2 4 3 5 6 8 7" << endl;
+	otec << endl << endl;
 
 	//---------------------------------------------------------------------------
 	///Export the meshes of nanotubes
