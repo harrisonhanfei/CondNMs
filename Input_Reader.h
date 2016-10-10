@@ -63,6 +63,7 @@ struct Nanowire_Geo{
 			string dir_distrib_type;			//Define the initial growth direction type (random or specific) in a RVE
 			string len_distrib_type;			//Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires
 			string rad_distrib_type;			//Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires
+			double step_length;				//Define the step length of nanotube growth
 			double angle_min, angle_max;	//Define the angle range of nanowires which is the bound for a given orientational distribution type
 			double len_min, len_max;		//Define the length range (min, max) of nanowires
 			double rad_min, rad_max;		//Define the radius range (min,max) of nanowires
@@ -73,6 +74,13 @@ struct Nanowire_Geo{
 			double real_weight;				//Define the real weight of nanowires
 			double linear_density;			//Define the linear density of nanowires
 			double matrix_density;			//Define the density of matrix
+		};
+//The cutoff distances
+struct Cutoff_dist{
+			string keywords;
+			bool mark;
+			double van_der_Waals_dist;
+			double tunneling_dist;
 		};
 //The electrical parameters
 struct Electric_para{
@@ -91,6 +99,7 @@ class Input
 		struct Simu_para simu_para;
 		struct Geom_RVE geom_rve;
 		struct Nanowire_Geo nanowire_geo;
+		struct Cutoff_dist cutoff_dist;
 		struct Electric_para electric_para;
 
 		//Constructor
@@ -106,6 +115,7 @@ private:
 		int Read_simulation_parameters(struct Simu_para &simu_para, ifstream &infile);
 		int Read_rve_geometry(struct Geom_RVE &geom_rve, ifstream &infile);
 		int Read_nanowire_geo_parameters(struct Nanowire_Geo &nanowire_geo, ifstream &infile);
+		int Read_cutoff_distances(struct Cutoff_dist &cutoff_dist, ifstream &infile);
 		int Read_electrical_paramters(struct Electric_para &electric_para, ifstream &infile);
 };
 //---------------------------------------------------------------------------

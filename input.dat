@@ -61,11 +61,11 @@ random -1.5707963267948966 1.5707963267948966
 %PI/2=1.5707963267948966; PI/4=0.7853981633974483; PI/6=0.5235987755982989; PI/12=0.2617993877991494; PI/36=0.087266462599716479; PI/60=0.05235987755982981
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the step length (unit: micromether) of nanowire growth
-%0.0
+0.01
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the distribution type (uniform or normal) of the length (unit: micromether) of nanowires and the length range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
-uniform 0.8 0.8
+uniform 0.6 0.6
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define the distribution type (uniform or normal) of the radius (unit: micromether) of nanowires and the radius range (min, max) of nanowires in a RVE
 %If you input "uniform", that means it satisfies the uniform distribution, or if you input "normal", that means it satisfies the normal distribution
@@ -76,7 +76,7 @@ uniform 0.005 0.005
 %or if you input "wt", the weight fraction is the criterion and the mode of accumulation and the linear density (1E-12g/'nu'm) of CNT and the density (1E-12g/'nu'm^3)of polymer are needed.
 %the mode of accumulation: 0 means every sample uses the same fraction; 1 or 2 mean every sample uses the accumulated fraction by different ways
 %nwt 0.005 0 5.8E-5 1.06
-area 0.05 0
+area 0.12 0
 %--------------------------------To end
 %
 %
@@ -102,13 +102,13 @@ area 0.05 0
 %========================================================================================================
 %-------------------------------- AMC
 %Define the cutoff distances
-%Cutoff_Distances
+Cutoff_Distances
 %--------------------------------To start
 %Define van der Waals distance
-%0.000340
+0.000340
 %------------------------------------------------------------------------------------------------------------------------------------------------------------
 %Define cutoff distance for tunneling
-%0.001800
+0.001800
 %-------------------------------- To end
 %
 %

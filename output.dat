@@ -14,19 +14,45 @@
 ^_^ Data initialization achieves
 
 Reading input file...
-    The area fraction is 0.5
+    The area fraction is 0.12
 Reading the keywords is finished!
     Operation done in 0secs.
 ^_^ Input achieves
 
 -_- To generate nanowire network......
-    The area fraction of generated CNTs is about : 0.500006
-There are 26998 CNTs.
-There are 53996 points.
-Nanowire network generation time: 278 secs.
+    The area fraction of generated CNTs is about : 0.120096
+There are 91 CNTs.
+There are 4696 points.
+Nanowire network generation time: 0 secs.
+Generate shells and structure time: 0 secs.
+======================================================
+Iteration 0
+Observation window geometry:
+xmin=0 ymin=0
+w_x=1 w_y=1
+Extract observation window time: 0 secs.
+There are 16 overlapping sub-regions.
+Generate contact grid time: 0 secs.
+Determine nanowire clusters time: 0 secs.
+Percolated clusters = 1
+Percolated families = 3 
+Determine percolating clusters time: 0 secs.
+Export tecplot files time: 0 secs.
+Maximum and minimum voltages = 0, 846
+CG iterations: 164
+Calculate voltage field time: 0 secs.
+Gap in current = (0.14485005848695209352, 3.2841285246831830591e-10), zero_cutoff = 3.2841285246831830591e-09
+Determine backbone network time: 0 secs.
+Appending to file: clusters_lengths.txt
+Appending to file: dead_branches_lengths.txt
+Appending to file: clusters_fractions.txt
+Appending to file: geom_fractions.txt
+Calculate fractions time: 0 secs.
+Export tecplot files time: 1 secs.
+Iteration 0 time: 1 secs.
 
 *******************************************************************
-    The simulation took 279secs.
+    The simulation took 1secs.
 ^_^ End of simulation 
 *******************************************************************
 

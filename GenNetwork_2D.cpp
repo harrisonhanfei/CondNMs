@@ -12,7 +12,7 @@
 int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, const struct Nanowire_Geo &nanowire_geo, vector<Point_3D> &cpoints, vector<double> &cnts_radius, vector<vector<long int> > &cstructures)const
 {
 	//Define a vector of vectors for storing the cartesian coordinates of nanowires
-    vector<vector<Point_3D> > cnts_points;
+	vector<vector<Point_3D> > cnts_points;
 	//Use the Mersenne Twister for the random number generation
 	if(Generate_network_threads_mt(geom_rve, nanowire_geo, cnts_points, cnts_radius)==0) return 0;
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -20,19 +20,19 @@ int GenNetwork::Generate_nanowire_networks(const struct Geom_RVE &geom_rve, cons
     if(Transform_cnts_points(cnts_points, cpoints, cstructures)==0) return 0;	
     //-----------------------------------------------------------------------------------------------------------------------------------------
 	//A new class of Tecplot_Export
-    Tecplot_Export *Tecexpt = new Tecplot_Export;
-     
-    struct cuboid cub;														//Generate a cuboid for RVE
-    cub.poi_min = geom_rve.ex_origin;
-    cub.len_x = geom_rve.ex_len;
+//	Tecplot_Export *Tecexpt = new Tecplot_Export;
+
+	struct cuboid cub;														//Generate a cuboid for RVE
+	cub.poi_min = geom_rve.ex_origin;
+	cub.len_x = geom_rve.ex_len;
 	cub.wid_y = geom_rve.ey_wid;
 	cub.hei_z = geom_rve.ez_hei;
-     
+    
 	//The geometric structure of CNT network (by threads in Tecplot)
-	if(Tecexpt->Export_network_threads(cub, cnts_points)==0) return 0;
-     
+//    if(Tecexpt->Export_network_threads(cub, cnts_points)==0) return 0;
+    
 	//The geometric structure of CNT network (by tetrahedron meshes in Tecplot) //Attention: little parts of nanotube volumes out of the cuboid
-	if(Tecexpt->Export_cnt_network_meshes(cub, cnts_points, cnts_radius)==0) return 0; 
+//    if(Tecexpt->Export_cnt_network_meshes(cub, cnts_points, cnts_radius)==0) return 0;
 	
 	return 1;
 }	
@@ -53,9 +53,13 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     std::random_device rd;
     // Use Mersenne twister engine to generate pseudo-random numbers.
     //Generate differnet engines for different variables
-    std::mt19937 engine_x(rd());
-    std::mt19937 engine_y(rd());
-    std::mt19937 engine_pha(rd());
+//    std::mt19937 engine_x(rd());
+//    std::mt19937 engine_y(rd());
+//    std::mt19937 engine_pha(rd());
+
+    std::mt19937 engine_x(13.0);
+    std::mt19937 engine_y(23.0);
+    std::mt19937 engine_pha(377.0);
 	
     //"Filter" MT's output to generate double values, uniformly distributed on the closed interval [0, 1].
 	std::uniform_real_distribution<double> dist(0.0, 1.0);
@@ -65,11 +69,8 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     double area_sum = 0;  //the sum of area of generated CNTs
     double wt_sum = 0;   //the sum of weight of generated CNTs
     int cnt_seed_count = 0; //to record the number of generated seeds of a CNT 
-    int point_overlap_count = 0; //to record the number of overlappings to calculate the projected area properly. This gives the transparency %T=100-a1*A_nw
-    int point_overlap_count_unique = 0; //to record the number of points that were overlapping other points ******May not be necessary, not sure : we will see later
-    const int MAX_ATTEMPTS = 5; // Overlapping case fixing
 	
-	// Global coordinates global_coordinates[0].at(i) -> global_coordinates[1].at(i) i'th nanowire
+	//Global coordinates global_coordinates[0].at(i) -> global_coordinates[1].at(i) i'th nanowire
     vector<vector<int> > global_coordinates;
     //sectioned_domain[i] contains all the points in sub-region i.
     //Sub-region i is an overlapping subregion to check for penetrations
@@ -102,14 +103,18 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
     {
         //---------------------------------------------------------------------------
         //Define two points for a new nanowire
-        Point_3D new_cnt[2];
+        vector<Point_3D> new_cnt;
+		//Define the step_length of nanowire growth
+		double step_length = nanowire_geo.step_length;
         
         //---------------------------------------------------------------------------
         //Randomly generate a length of a CNT
         double cnt_length;
         if(Get_random_value_mt(nanowire_geo.len_distrib_type, engine_pha, dist, nanowire_geo.len_min, nanowire_geo.len_max, cnt_length)==0) return 0;
-        //---------------------------------------------------------------------------
-
+        //Calculate the total number of growth step for a CNT
+        int step_num = (int)(cnt_length/step_length) + 1;        
+		
+		//---------------------------------------------------------------------------
         //Randomly generate a radius of a CNT
         double cnt_rad;
         if(Get_random_value_mt(nanowire_geo.rad_distrib_type, engine_pha, dist, nanowire_geo.rad_min, nanowire_geo.rad_max, cnt_rad)==0) return 0;
@@ -127,7 +132,7 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
         //Randomly generate a seed (initial point) of a CNT in the extended RVE	
         Point_3D cnt_poi;
         if(Get_seed_point_mt(excub, cnt_poi, engine_x, engine_y, dist)==0) return 0;
-		new_cnt[0] = cnt_poi;	//store this seed point in the array for a new nanowire
+        new_cnt.push_back(cnt_poi);	//store this seed point in the vector for a new nanowire
         
 		//---------------------------------------------------------------------------
         cnt_seed_count++;					//record the number of seed generations
@@ -138,62 +143,88 @@ int GenNetwork::Generate_network_threads_mt(const struct Geom_RVE &geom_rve, con
             return 0;
         }
 
-		//---------------------------------------------------------------------------
-		//The end point of nanowire (the corresponding initial-point is new_cnt[0])
-		cnt_poi.x += cnt_length*cos(cnt_pha);
-		cnt_poi.y += cnt_length*sin(cnt_pha);
-		
         //---------------------------------------------------------------------------
-        //If the new CNT point grows out of the RVE, the intersecting point at the surfaces of RVE will be calculated.
-        //The new segment will be cut
-        if(Judge_RVE_including_point(excub, cnt_poi)==0)
+        //The growth process of nanotube
+        for(int i=0; i<step_num; i++)
         {
-            //Calculate all intersection points between the new segment and surfaces of RVE
-            //(using a parametric equatio:  the parameter 0<t<1, and sort all intersection points from the smaller t to the greater t)
-            vector<Point_3D> ipoi_vec;  //a vector for intersection points
-            if(Get_intersecting_point_RVE_surface(excub, new_cnt[0], cnt_poi, ipoi_vec)==0) 
+			//---------------------------------------------------------------------------
+			//The end point of nanowire (the corresponding initial-point is new_cnt[0])
+			cnt_poi.x += step_length*cos(cnt_pha);
+			cnt_poi.y += step_length*sin(cnt_pha);
+			cnt_poi.flag = 1;							//1 means that point is not the intial point		
+
+			//---------------------------------------------------------------------------
+			//If the new CNT point grows out of the RVE, the intersecting point at the surfaces of RVE will be calculated.
+			//The new segment will be cut
+			bool touch_end = false;
+			if(Judge_RVE_including_point(excub, cnt_poi)==0)
 			{
-                hout << "Error in Generate_network_threads"<<endl;
-                return 0;
-            }
-            cnt_poi = ipoi_vec[0];
-        }
+				//Calculate all intersection points between the new segment and surfaces of RVE
+				//(using a parametric equatio:  the parameter 0<t<1, and sort all intersection points from the smaller t to the greater t)
+				vector<Point_3D> ipoi_vec;  //a vector for intersection points
+				if(Get_intersecting_point_RVE_surface(excub, new_cnt[0], cnt_poi, ipoi_vec)==0) 
+				{
+					hout << "Error in Generate_network_threads"<<endl;
+					return 0;
+				}
+				cnt_poi = ipoi_vec[0];
+				//Break the for-loop
+				touch_end = true;
+			}
 
-		//---------------------------------------------------------------------------
-        //At this point a nanowire is created with length 'cnt_length' and diameter '2*cnt_rad' and orientation 'cnt_pha'
-	    //Calculate the accumulated area and the weight
-		double temp_length;
-        if(Effective_length_given_region(gvcub, new_cnt[0], cnt_poi, temp_length)==0)
-		{
-			hout << "Error in Effective_length_given_region!"<<endl;
-			return 0;
+			//---------------------------------------------------------------------------
+			//At this point a nanowire is created with length 'cnt_length' and diameter '2*cnt_rad' and orientation 'cnt_pha'
+			//Calculate the accumulated area and the weight
+			double temp_length = 0.0;
+			if(Effective_length_given_region(gvcub, new_cnt.back(), cnt_poi, temp_length)==0)
+			{
+				hout << "Error in Effective_length_given_region!"<<endl;
+				return 0;
+			}
+			if (temp_length > 0.0)
+			{
+				area_sum += temp_length*2*cnt_rad;		//an accumulation on the area (Not the projection area)
+				wt_sum += temp_length*wei_para;	     	//an accumulation on the weight
+			}
+
+			//---------------------------------------------------------------------------
+			//Add the point as the end point of the nanowire
+			new_cnt.push_back(cnt_poi);							//store a new point
+		    
+            //---------------------------------------------------------------------------
+            //Judge the new volume or weight
+            if(nanowire_geo.criterion == "area"&&area_sum >= nanowire_geo.real_area) break;		//Break out when the volume reaches the critical value
+            else if(nanowire_geo.criterion == "wt"&&wt_sum >= nanowire_geo.real_weight) break;		//Break out when the weight reaches the critical value
+            else if (touch_end) break; //Enforce break
 		}
-        if (temp_length > 0.0)
-        {
-            area_sum += temp_length*2*cnt_rad;		//an accumulation on the area (Not the projection area)
-            wt_sum += temp_length*wei_para;	     	//an accumulation on the weight
-        }
-
-        //---------------------------------------------------------------------------
-	    //Add the point as the end point of the nanowire
-	    new_cnt[1] = cnt_poi;
-		        
         //---------------------------------------------------------------------------
         //Store the CNT points
-		//If the new_cnt array has exactly two points - error if something else happens
-		vector<Point_3D> cnt_temp;
-		cnt_temp.push_back(new_cnt[0]);  // First point of the nanowire
-		cnt_temp.push_back(new_cnt[1]);  // End point of the same nanowire
-		Cnts_points.push_back(cnt_temp);
-        Cnts_radius.push_back(cnt_rad);
-		cnt_temp.clear();
+        if(new_cnt.size() >= 2)
+        {
+			//If the new_cnt array has exactly two points - error if something else happens
+			vector<Point_3D> cnt_temp;
+            for(int i=0; i<(int)new_cnt.size(); i++)
+            {
+				cnt_temp.push_back(new_cnt[i]);  //insert the wire point
+                
+				//Two cases (when using periodic boundary conditions)
+                //a) Check if reached the end of the new wire (new_cnt.size()-1)
+                //b) Check if reached the end of a wire but there are still points in new_cnt (flag=0)
+                if(i==(int)new_cnt.size()-1||new_cnt[i+1].flag==0)
+                {
+					 if((int)cnt_temp.size()>1)							//if the size is equal to 1, that means the whole wire only include one point, it doesn't creat a wire segment
+                    {
+						Cnts_points.push_back(cnt_temp);
+						Cnts_radius.push_back(cnt_rad);
+					 }
+					 cnt_temp.clear();
+				}
+			}
+		}
 	}	
     if(nanowire_geo.criterion == "area") hout << "    The area fraction of generated CNTs is about : " << area_sum/geom_rve.crosec_area << endl;
     
-//  hout << "There were " << point_overlap_count_unique << " overlapping points and ";
-//  hout << point_overlap_count << " overlaps, " << endl;
-    
-    return 1;
+	return 1;
 }
 
 //---------------------------------------------------------------------------
@@ -334,7 +365,7 @@ int GenNetwork::Get_intersecting_point_RVE_surface(const struct cuboid &cub, con
                 else left = middle + 1;
             }
             t_ratio.insert(t_ratio.begin()+left, t_temp[i]);	//insertion
-        T_Value_Same: ;
+		T_Value_Same: ;
         }
     }
     
