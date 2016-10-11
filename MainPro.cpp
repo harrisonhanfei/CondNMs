@@ -1,5 +1,5 @@
 //===========================================================================
-//SOFTWARE:	Network of Eelectrically Conductive Nanocomposites (NECN)
+//SOFTWARE:	Transparent electrodes og Ag NWs
 //CODE FILE:	MainProg.cpp
 //OBJECTIVE:	Main program beginning
 //AUTHOR:		Fei Han; Angel Mora
