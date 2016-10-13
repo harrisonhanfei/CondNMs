@@ -282,7 +282,7 @@ int GenNetwork::Get_uniform_direction_mt(const struct Nanowire_Geo &nanowire_geo
     if(nanowire_geo.dir_distrib_type=="random") //random distribution
     {   
         cnt_pha = nanowire_geo.angle_min + (nanowire_geo.angle_max-nanowire_geo.angle_min) * dist(engine_pha);
-		if(dist(engine_pha)<0.5) cnt_pha = -cnt_pha;
+		if(dist(engine_pha)<0.5) cnt_pha = cnt_pha + PI;
     }
     else if(nanowire_geo.dir_distrib_type=="normal") //normal distribution
     {
@@ -292,7 +292,7 @@ int GenNetwork::Get_uniform_direction_mt(const struct Nanowire_Geo &nanowire_geo
             sum = sum + dist(engine_pha);
         }
 		cnt_pha = (nanowire_geo.angle_max-nanowire_geo.angle_min)*sum/12.0 + nanowire_geo.angle_min;
-		if(dist(engine_pha)<0.5) cnt_pha = -cnt_pha;
+		if(dist(engine_pha)<0.5) cnt_pha = cnt_pha + PI;
 	}
 
 	return 1;
